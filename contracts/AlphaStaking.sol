@@ -4,8 +4,9 @@ import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/token/ERC20/IERC20.s
 import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/token/ERC20/SafeERC20.sol';
 import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/utils/ReentrancyGuard.sol';
 import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/math/SafeMath.sol';
+import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/proxy/Initializable.sol';
 
-contract AlphaStaking is ReentrancyGuard {
+contract AlphaStaking is Initializable, ReentrancyGuard {
   using SafeERC20 for IERC20;
   using SafeMath for uint;
 
@@ -25,6 +26,10 @@ contract AlphaStaking is ReentrancyGuard {
   uint public totalAlpha;
   uint public totalShare;
   mapping(address => Data) public users;
+
+  function initialize(IERC20 _alpha) external initializer {
+    alpha = _alpha;
+  }
 
   function stake(uint amount) external nonReentrant {
     require(amount >= 1e18, 'stake/amount-too-small');
