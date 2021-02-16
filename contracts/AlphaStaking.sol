@@ -72,10 +72,6 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
   function reset() external nonReentrant {
     Data storage data = users[msg.sender];
     require(data.status == STATUS_UNBONDING, 'reset/not-unbonding');
-    require(
-      block.timestamp >= data.unbondTime + UNBONDING_DURATION + WITHDRAW_DURATION,
-      'reset/not-expired'
-    );
     data.status = STATUS_READY;
     data.unbondTime = 0;
     data.unbondShare = 0;
