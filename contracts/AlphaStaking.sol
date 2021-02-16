@@ -64,6 +64,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     totalAlpha = totalAlpha.sub(amount);
     totalShare = totalShare.sub(share);
     data.share = data.share.sub(share);
+    data.status = STAUS_READY;
     data.unbondTime = 0;
     data.unbondShare = 0;
     alpha.safeTransfer(msg.sender, amount);
