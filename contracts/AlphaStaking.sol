@@ -111,4 +111,10 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     alpha.safeTransfer(msg.sender, amount);
     require(alpha.balanceOf(address(this)) >= totalAlpha, 'skim/not-enough-balance');
   }
+
+  function extract(uint amount) external onlyGov {
+    totalAlpha = totalAlpha.sub(amount);
+    alpha.safeTransfer(msg.sender, amount);
+    require(totalAlpha >= 1e18, 'extract/too-low-total-alpha');
+  }
 }
