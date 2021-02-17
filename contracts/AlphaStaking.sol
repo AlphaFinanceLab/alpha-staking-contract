@@ -23,18 +23,45 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
   }
 
   IERC20 public alpha;
+  address public governor;
+  address public pendingGovernor;
   uint public totalAlpha;
   uint public totalShare;
   mapping(address => Data) public users;
 
-  function initialize(IERC20 _alpha) external initializer {
+  modifier onlyGov() {
+    require(msg.sender == governor, 'onlyGov/not-governor');
+    _;
+  }
+
+  function initialize(IERC20 _alpha, address _governor) external initializer {
     alpha = _alpha;
+    governor = _governor;
+  }
+
+  function setPendingGovernor(address _pendingGovernor) external onlyGov {
+    pendingGovernor = _pendingGovernor;
+  }
+
+  function acceptGovernor() external {
+    require(msg.sender == pendingGovernor, 'acceptGovernor/not-pending');
+    pendingGovernor = address(0);
+    governor = msg.sender;
+  }
+
+  function getStakeValue(address user) external view returns (uint) {
+    uint share = users[user].share;
+    return share == 0 ? 0 : share.mul(totalAlpha).div(totalShare);
   }
 
   function stake(uint amount) external nonReentrant {
     require(amount >= 1e18, 'stake/amount-too-small');
     Data storage data = users[msg.sender];
-    require(data.status == STATUS_READY, 'stake/not-ready');
+    if (data.status != STATUS_READY) {
+      data.status = STATUS_READY;
+      data.unbondTime = 0;
+      data.unbondShare = 0;
+    }
     alpha.safeTransferFrom(msg.sender, address(this), amount);
     uint share = totalAlpha == 0 ? amount : amount.mul(totalShare).div(totalAlpha);
     totalAlpha = totalAlpha.add(amount);
@@ -44,7 +71,11 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
 
   function unbond(uint share) external nonReentrant {
     Data storage data = users[msg.sender];
-    require(data.status == STATUS_READY, 'unbond/not-ready');
+    if (data.status != STATUS_READY) {
+      data.status = STATUS_READY;
+      data.unbondTime = 0;
+      data.unbondShare = 0;
+    }
     require(share <= data.share, 'unbond/insufficient-share');
     data.status = STATUS_UNBONDING;
     data.unbondTime = block.timestamp;
@@ -64,17 +95,20 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     totalAlpha = totalAlpha.sub(amount);
     totalShare = totalShare.sub(share);
     data.share = data.share.sub(share);
-    data.status = STAUS_READY;
+    data.status = STATUS_READY;
     data.unbondTime = 0;
     data.unbondShare = 0;
     alpha.safeTransfer(msg.sender, amount);
   }
 
-  function reset() external nonReentrant {
-    Data storage data = users[msg.sender];
-    require(data.status == STATUS_UNBONDING, 'reset/not-unbonding');
-    data.status = STATUS_READY;
-    data.unbondTime = 0;
-    data.unbondShare = 0;
+  function reward(uint amount) external onlyGov {
+    require(totalShare >= 1e18, 'reward/share-too-small');
+    alpha.safeTransferFrom(msg.sender, address(this), amount);
+    totalAlpha = totalAlpha.add(amount);
+  }
+
+  function skim(uint amount) external onlyGov {
+    alpha.safeTransfer(msg.sender, amount);
+    require(alpha.balanceOf(address(this)) >= totalAlpha, 'skim/not-enough-balance');
   }
 }
