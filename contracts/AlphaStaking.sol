@@ -25,6 +25,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
   IERC20 public alpha;
   address public governor;
   address public pendingGovernor;
+  address public worker;
   uint public totalAlpha;
   uint public totalShare;
   mapping(address => Data) public users;
@@ -34,9 +35,18 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     _;
   }
 
+  modifier onlyWorker() {
+    require(msg.sender == worker || msg.sender == governor, 'onlyWorker/not-worker');
+    _;
+  }
+
   function initialize(IERC20 _alpha, address _governor) external initializer {
     alpha = _alpha;
     governor = _governor;
+  }
+
+  function setWorker(address _worker) external onlyGov {
+    worker = _worker;
   }
 
   function setPendingGovernor(address _pendingGovernor) external onlyGov {
@@ -101,7 +111,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     alpha.safeTransfer(msg.sender, amount);
   }
 
-  function reward(uint amount) external onlyGov {
+  function reward(uint amount) external onlyWorker {
     require(totalShare >= 1e18, 'reward/share-too-small');
     alpha.safeTransferFrom(msg.sender, address(this), amount);
     totalAlpha = totalAlpha.add(amount);
