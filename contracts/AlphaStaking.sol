@@ -10,6 +10,13 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
   using SafeERC20 for IERC20;
   using SafeMath for uint;
 
+  event SetWorker(address worker);
+  event Stake(address owner, uint share, uint amount);
+  event Unbond(address owner, uint unbondTime, uint unbondShare);
+  event Withdraw(address owner, uint withdrawShare, uint withdrawAmount);
+  event CancelUnbond(address owner, uint unbondTime, uint unbondShare);
+  event Reward(address worker, uint rewardAmount);
+
   uint public constant STATUS_READY = 0;
   uint public constant STATUS_UNBONDING = 1;
   uint public constant UNBONDING_DURATION = 7 days;
@@ -47,6 +54,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
 
   function setWorker(address _worker) external onlyGov {
     worker = _worker;
+    emit SetWorker(worker);
   }
 
   function setPendingGovernor(address _pendingGovernor) external onlyGov {
@@ -68,6 +76,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     require(amount >= 1e18, 'stake/amount-too-small');
     Data storage data = users[msg.sender];
     if (data.status != STATUS_READY) {
+      emit CancelUnbond(msg.sender, data.unbondTime, data.unbondShare);
       data.status = STATUS_READY;
       data.unbondTime = 0;
       data.unbondShare = 0;
@@ -77,11 +86,13 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     totalAlpha = totalAlpha.add(amount);
     totalShare = totalShare.add(share);
     data.share = data.share.add(share);
+    emit Stake(msg.sender, share, amount);
   }
 
   function unbond(uint share) external nonReentrant {
     Data storage data = users[msg.sender];
     if (data.status != STATUS_READY) {
+      emit CancelUnbond(msg.sender, data.unbondTime, data.unbondShare);
       data.status = STATUS_READY;
       data.unbondTime = 0;
       data.unbondShare = 0;
@@ -90,6 +101,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     data.status = STATUS_UNBONDING;
     data.unbondTime = block.timestamp;
     data.unbondShare = share;
+    emit Unbond(msg.sender, block.timestamp, share);
   }
 
   function withdraw() external nonReentrant {
@@ -105,6 +117,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     totalAlpha = totalAlpha.sub(amount);
     totalShare = totalShare.sub(share);
     data.share = data.share.sub(share);
+    emit Withdraw(msg.sender, share, amount);
     data.status = STATUS_READY;
     data.unbondTime = 0;
     data.unbondShare = 0;
@@ -115,6 +128,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     require(totalShare >= 1e18, 'reward/share-too-small');
     alpha.safeTransferFrom(msg.sender, address(this), amount);
     totalAlpha = totalAlpha.add(amount);
+    emit Reward(msg.sender, amount);
   }
 
   function skim(uint amount) external onlyGov {
