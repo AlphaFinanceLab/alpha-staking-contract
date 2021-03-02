@@ -16,6 +16,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
   event Withdraw(address owner, uint withdrawShare, uint withdrawAmount);
   event CancelUnbond(address owner, uint unbondTime, uint unbondShare);
   event Reward(address worker, uint rewardAmount);
+  event Extract(address governor, uint extractAmount);
 
   uint public constant STATUS_READY = 0;
   uint public constant STATUS_UNBONDING = 1;
@@ -140,5 +141,6 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     totalAlpha = totalAlpha.sub(amount);
     alpha.safeTransfer(msg.sender, amount);
     require(totalAlpha >= 1e18, 'extract/too-low-total-alpha');
+    emit Extract(msg.sender, amount);
   }
 }
