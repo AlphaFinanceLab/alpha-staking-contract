@@ -55,7 +55,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
 
   function setWorker(address _worker) external onlyGov {
     worker = _worker;
-    emit SetWorker(worker);
+    emit SetWorker(_worker);
   }
 
   function setPendingGovernor(address _pendingGovernor) external onlyGov {
