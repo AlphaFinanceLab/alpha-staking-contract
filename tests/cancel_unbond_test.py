@@ -1,18 +1,12 @@
 from brownie import interface, Contract, accounts, chain
 import brownie
 
-
-def test_cancel_unbond(a, deployer, alice, bob, worker, alpha, staking):
+def test_unbond_then_stake(a, deployer, alice, bob, worker, alpha, staking):
     alice_stake_amt = 10**18
     bob_stake_amt = 3 * 10**18
 
-    # setup stake
     staking.stake(alice_stake_amt, {'from': alice})
     staking.stake(bob_stake_amt, {'from': bob})
-
-    ####################################################################################
-    print('===============================================')
-    print('1. Unbond -> Stake')
 
     prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
     assert prev_status == 0, 'incorrect alice status before unbond'
@@ -33,9 +27,13 @@ def test_cancel_unbond(a, deployer, alice, bob, worker, alpha, staking):
     assert cur_unbondtime == 0, 'incorrect unbond time after re-stake'
     assert cur_unbondshare == 0, 'incorrect unbond share after re-stake'
 
-    ####################################################################################
-    print('===============================================')
-    print('2. Unbond -> Unbond')
+
+def test_unbond_twice(a, deployer, alice, bob, worker, alpha, staking):
+    alice_stake_amt = 10**18
+    bob_stake_amt = 3 * 10**18
+
+    staking.stake(alice_stake_amt, {'from': alice})
+    staking.stake(bob_stake_amt, {'from': bob})
 
     tx = staking.unbond(prev_share // 3, {'from': alice})
 
@@ -44,6 +42,8 @@ def test_cancel_unbond(a, deployer, alice, bob, worker, alpha, staking):
     assert cur_unbondtime == tx.timestamp, 'incorrect unbond time after unbond'
     assert cur_unbondshare == prev_share // 3, 'incorrect unbond share after unbond'
 
+    chain.sleep(1 * 86400)
+
     tx = staking.unbond(prev_share // 4, {'from': alice})
 
     cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
@@ -51,9 +51,13 @@ def test_cancel_unbond(a, deployer, alice, bob, worker, alpha, staking):
     assert cur_unbondtime == tx.timestamp, 'incorrect unbond time after re-unbond'
     assert cur_unbondshare == prev_share // 4, 'incorrect unbond share after re-unbond'
 
-    ####################################################################################
-    print('===============================================')
-    print('3. Unbond (wait 7 days, enter withdraw period) -> Stake')
+
+def test_stake_after_withdraw_period(a, deployer, alice, bob, worker, alpha, staking):
+    alice_stake_amt = 10**18
+    bob_stake_amt = 3 * 10**18
+
+    staking.stake(alice_stake_amt, {'from': alice})
+    staking.stake(bob_stake_amt, {'from': bob})
 
     tx = staking.unbond(prev_share // 3, {'from': alice})
 
@@ -73,9 +77,12 @@ def test_cancel_unbond(a, deployer, alice, bob, worker, alpha, staking):
     assert cur_unbondtime == 0, 'incorrect unbond time after re-stake'
     assert cur_unbondshare == 0, 'incorrect unbond share after re-stake'
 
-    ####################################################################################
-    print('===============================================')
-    print('4. Unbond (wait 7 days, enter withdraw period) -> Unbond')
+def test_unbond_after_withdraw_period(a, deployer, alice, bob, worker, alpha, staking):
+    alice_stake_amt = 10**18
+    bob_stake_amt = 3 * 10**18
+
+    staking.stake(alice_stake_amt, {'from': alice})
+    staking.stake(bob_stake_amt, {'from': bob})
 
     tx = staking.unbond(prev_share // 3, {'from': alice})
 
@@ -95,9 +102,12 @@ def test_cancel_unbond(a, deployer, alice, bob, worker, alpha, staking):
     assert cur_unbondtime == tx.timestamp, 'incorrect unbond time after re-unbond'
     assert cur_unbondshare == prev_share // 4, 'incorrect unbond share after re-unbond'
 
-    ####################################################################################
-    print('===============================================')
-    print('5. Unbond (wait 10 days, withdraw period expires) -> Stake')
+def test_stake_after_withdraw_period_expired(a, deployer, alice, bob, worker, alpha, staking):
+    alice_stake_amt = 10**18
+    bob_stake_amt = 3 * 10**18
+
+    staking.stake(alice_stake_amt, {'from': alice})
+    staking.stake(bob_stake_amt, {'from': bob})
 
     tx = staking.unbond(prev_share // 3, {'from': alice})
 
@@ -117,9 +127,12 @@ def test_cancel_unbond(a, deployer, alice, bob, worker, alpha, staking):
     assert cur_unbondtime == 0, 'incorrect unbond time after re-stake'
     assert cur_unbondshare == 0, 'incorrect unbond share after re-stake'
 
-    ####################################################################################
-    print('===============================================')
-    print('6. Unbond (wait 10 days, withdraw period expires) -> Unbond')
+def test_unbond_after_withdraw_period_expired(a, deployer, alice, bob, worker, alpha, staking):
+    alice_stake_amt = 10**18
+    bob_stake_amt = 3 * 10**18
+
+    staking.stake(alice_stake_amt, {'from': alice})
+    staking.stake(bob_stake_amt, {'from': bob})
 
     tx = staking.unbond(prev_share // 3, {'from': alice})
 
@@ -131,7 +144,6 @@ def test_cancel_unbond(a, deployer, alice, bob, worker, alpha, staking):
     # wait 10 days
     chain.sleep(10 * 86400)
 
-    # re-stake
     tx = staking.unbond(prev_share // 4, {'from': alice})
 
     cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
