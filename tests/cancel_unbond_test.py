@@ -35,6 +35,7 @@ def test_unbond_twice(a, deployer, alice, bob, worker, alpha, staking):
     staking.stake(alice_stake_amt, {'from': alice})
     staking.stake(bob_stake_amt, {'from': bob})
 
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
     tx = staking.unbond(prev_share // 3, {'from': alice})
 
     cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
@@ -59,6 +60,7 @@ def test_stake_after_withdraw_period(a, deployer, alice, bob, worker, alpha, sta
     staking.stake(alice_stake_amt, {'from': alice})
     staking.stake(bob_stake_amt, {'from': bob})
 
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
     tx = staking.unbond(prev_share // 3, {'from': alice})
 
     cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
@@ -84,6 +86,7 @@ def test_unbond_after_withdraw_period(a, deployer, alice, bob, worker, alpha, st
     staking.stake(alice_stake_amt, {'from': alice})
     staking.stake(bob_stake_amt, {'from': bob})
 
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
     tx = staking.unbond(prev_share // 3, {'from': alice})
 
     cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
@@ -109,6 +112,7 @@ def test_stake_after_withdraw_period_expired(a, deployer, alice, bob, worker, al
     staking.stake(alice_stake_amt, {'from': alice})
     staking.stake(bob_stake_amt, {'from': bob})
 
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
     tx = staking.unbond(prev_share // 3, {'from': alice})
 
     cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
@@ -134,6 +138,7 @@ def test_unbond_after_withdraw_period_expired(a, deployer, alice, bob, worker, a
     staking.stake(alice_stake_amt, {'from': alice})
     staking.stake(bob_stake_amt, {'from': bob})
 
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
     tx = staking.unbond(prev_share // 3, {'from': alice})
 
     cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)

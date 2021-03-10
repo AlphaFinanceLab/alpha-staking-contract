@@ -19,8 +19,8 @@ def worker(a):
     return a[9]
 
 @pytest.fixture(scope='function')
-def alpha(a):
-    return interface.IAny('0xa1faa113cbE53436Df28FF0aEe54275c13B40975')
+def alpha(a, MockERC20):
+    return MockERC20.deploy('ALPHA', 'ALPHA', 18, {'from': a[0]})
 
 @pytest.fixture(scope='function')
 def proxy_admin(a, deployer, ProxyAdminImpl):
@@ -34,10 +34,10 @@ def staking(a, alpha, deployer, alice, bob, worker, proxy_admin, AlphaStaking, T
     contract = interface.IAny(contract)
     contract.setWorker(worker, {'from': deployer})
 
-    mint_tokens(alpha, alice)
-    mint_tokens(alpha, bob)
-    mint_tokens(alpha, deployer)
-    mint_tokens(alpha, worker)
+    alpha.mint(alice, 10**30)
+    alpha.mint(bob, 10**30)
+    alpha.mint(deployer, 10**30)
+    alpha.mint(worker, 10**30)
 
     alpha.approve(contract, 2**256-1, {'from': alice})
     alpha.approve(contract, 2**256-1, {'from': bob})

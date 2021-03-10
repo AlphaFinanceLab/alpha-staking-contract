@@ -60,6 +60,16 @@ def test_withdraw_before_time(a, deployer, alice, bob, worker, alpha, staking):
     staking.stake(alice_stake_amt, {'from': alice})
     staking.stake(bob_stake_amt, {'from': bob})
 
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
+    
+    with brownie.reverts('withdraw/not-unbonding'):
+        staking.withdraw({'from': alice})
+
+    staking.unbond(prev_share, {'from': alice})
+    with brownie.reverts('withdraw/not-valid'):
+        staking.withdraw({'from': alice})
+
+    chain.sleep(1 * 86400)
     with brownie.reverts('withdraw/not-valid'):
         staking.withdraw({'from': alice})
 

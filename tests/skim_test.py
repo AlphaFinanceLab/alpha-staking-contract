@@ -1,9 +1,10 @@
 from brownie import interface, Contract, accounts
 import brownie
 
-def test_not_enough_alpha(staking, deployer, alpha):
+def test_not_enough_alpha(staking, deployer, alpha, alice, bob):
     assert alpha.balanceOf(staking) == 0, 'invalid initial alpha in staking contract'
-    with brownie.reverts('skim/not-enough-balance'):
+
+    with brownie.reverts('ERC20: transfer amount exceeds balance'):
         staking.skim(1, {'from': deployer})
 
     alice_stake_amt = 10**18
