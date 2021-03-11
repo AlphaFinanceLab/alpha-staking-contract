@@ -18,9 +18,9 @@ def main():
     staking = interface.IAny(staking)
 
     # mint tokens
-    mint_tokens(alpha, alice)
-    mint_tokens(alpha, bob)
-    mint_tokens(alpha, deployer)
+    alpha.mint(alice, 10**30)
+    alpha.mint(bob, 10**30)
+    alpha.mint(deployer, 10**30)
 
     # approve
     alpha.approve(staking, 2**256-1, {'from': alice})
