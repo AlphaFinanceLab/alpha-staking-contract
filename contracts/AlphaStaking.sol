@@ -94,9 +94,6 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     Data storage data = users[msg.sender];
     if (data.status != STATUS_READY) {
       emit CancelUnbond(msg.sender, data.unbondTime, data.unbondShare);
-      data.status = STATUS_READY;
-      data.unbondTime = 0;
-      data.unbondShare = 0;
     }
     require(share <= data.share, 'unbond/insufficient-share');
     data.status = STATUS_UNBONDING;
