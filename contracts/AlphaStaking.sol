@@ -108,9 +108,9 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
   function withdraw() external nonReentrant {
     Data storage data = users[msg.sender];
     require(data.status == STATUS_UNBONDING, 'withdraw/not-unbonding');
-    require(block.timestamp >= data.unbondTime + UNBONDING_DURATION, 'withdraw/not-valid');
+    require(block.timestamp >= data.unbondTime.add(UNBONDING_DURATION), 'withdraw/not-valid');
     require(
-      block.timestamp < data.unbondTime + UNBONDING_DURATION + WITHDRAW_DURATION,
+      block.timestamp < data.unbondTime.add(UNBONDING_DURATION).add(WITHDRAW_DURATION),
       'withdraw/already-expired'
     );
     uint share = data.unbondShare;
