@@ -13,7 +13,7 @@ def main():
     # deployer = accounts.load('gh')
 
     alpha = '0xa1faa113cbe53436df28ff0aee54275c13b40975'
-    worker = ''
+    worker = deployer
 
     proxy_admin = ProxyAdminImpl.deploy({'from': deployer, 'gas_price': gas_strategy})
     staking_impl = AlphaStaking.deploy({'from': deployer, 'gas_price': gas_strategy})
@@ -26,4 +26,5 @@ def main():
     staking.setWorker(worker, {'from': deployer, 'gas_price': gas_strategy})
 
     # stake 10 alpha
-    staking.stake(19 * 10**18, {'from': deployer, 'gas_price': gas_strategy})
+    interface.IAny(alpha).approve(staking, 2**256-1, {'from': deployer, 'gas_price': gas_strategy})
+    staking.stake(10 * 10**18, {'from': deployer, 'gas_price': gas_strategy})
