@@ -43,7 +43,6 @@ def test_extract_during_unbond(a, deployer, alice, bob, worker, alpha, staking):
     with brownie.reverts('withdraw/not-valid'):
         staking.withdraw({'from': alice})
 
-
     staking.extract(100*10**18, {'from': deployer})
 
     chain.sleep(7 * 86400)
@@ -82,8 +81,6 @@ def test_staking_after_extract(a, deployer, alice, bob, worker, alpha, staking):
 
     staking.extract(100*10**18, {'from': deployer})
     staking.stake(bob_stake_amt, {'from': bob})
-
-    print(staking.getStakeValue(bob) / 10**18)
 
     staking.unbond(alice_stake_amt, {'from': alice})
     staking.unbond(bob_stake_amt * 2, {'from': bob})
