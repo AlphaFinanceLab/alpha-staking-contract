@@ -1,0 +1,13 @@
+project_structure:
+  build: build
+  contracts: contracts
+  interfaces: interfaces
+  reports: reports
+  scripts: scripts
+  tests: tests
+
+networks:
+  default: development
+  development:
+    cmd_settings:
+      default_balance: 1000000000
