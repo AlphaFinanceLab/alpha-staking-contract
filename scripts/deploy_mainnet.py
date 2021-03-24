@@ -20,7 +20,8 @@ def main():
     staking = interface.IAny(staking)
 
     # approve staking contract
-    alpha.approve(staking, 2**256-1, {'from': deployer, 'gas_price': gas_strategy})
+    stake_amt = 10 * 10**18
+    alpha.approve(staking, stake_amt, {'from': deployer, 'gas_price': gas_strategy})
 
     # stake 10 ALPHA
-    staking.stake(10 * 10**18, {'from': deployer, 'gas_price': gas_strategy})
+    staking.stake(stake_amt, {'from': deployer, 'gas_price': gas_strategy})
