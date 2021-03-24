@@ -120,6 +120,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
     data.unbondTime = 0;
     data.unbondShare = 0;
     alpha.safeTransfer(msg.sender, amount);
+    require(totalAlpha >= 1e18, 'withdraw/too-low-total-alpha');
   }
 
   function reward(uint amount) external onlyWorker {
