@@ -20,7 +20,7 @@ contract AlphaStaking is Initializable, ReentrancyGuard {
 
   uint public constant STATUS_READY = 0;
   uint public constant STATUS_UNBONDING = 1;
-  uint public constant UNBONDING_DURATION = 7 days;
+  uint public constant UNBONDING_DURATION = 30 days;
   uint public constant WITHDRAW_DURATION = 1 days;
 
   struct Data {
