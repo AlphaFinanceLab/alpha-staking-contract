@@ -46,4 +46,6 @@ interface IAny {
     function skim(uint) external;
     
     function extract(uint) external;
+
+    function getProxyImplementation(address) external view returns (address);
 }
