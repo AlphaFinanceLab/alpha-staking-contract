@@ -6,7 +6,7 @@ import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/utils/ReentrancyGuar
 import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/math/SafeMath.sol';
 import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/proxy/Initializable.sol';
 
-contract AlphaStakingV2 is Initializable, ReentrancyGuard {
+contract AlphaStaking is Initializable, ReentrancyGuard {
   using SafeERC20 for IERC20;
   using SafeMath for uint;
 
@@ -20,7 +20,7 @@ contract AlphaStakingV2 is Initializable, ReentrancyGuard {
 
   uint public constant STATUS_READY = 0;
   uint public constant STATUS_UNBONDING = 1;
-  uint public constant UNBONDING_DURATION = 30 days;
+  uint public constant UNBONDING_DURATION = 7 days;
   uint public constant WITHDRAW_DURATION = 1 days;
 
   struct Data {
