@@ -1,9 +1,13 @@
 from brownie import accounts, interface
 from brownie import AlphaStaking, AlphaStakingV2, TransparentUpgradeableProxyImpl, ProxyAdminImpl
 from brownie.network.gas.strategies import GasNowScalingStrategy
+from brownie import network
+
 
 gas_strategy = GasNowScalingStrategy(
-    initial_speed="slow", max_speed="fast", increment=1.085, block_duration=20)
+    initial_speed="fast", max_speed="fast", increment=1.085, block_duration=20)
+
+network.gas_price(gas_strategy)
 
 
 def main():
@@ -16,20 +20,19 @@ def main():
     proxy_admin = ProxyAdminImpl.at(
         '0x090eCE252cEc5998Db765073D07fac77b8e60CB2')
     staking_impl_v2 = AlphaStakingV2.deploy(
-        {'from': deployer, 'gas_price': gas_strategy})
+        {'from': deployer})
+    staking_impl_v2.initialize(alpha, deployer)
     staking = TransparentUpgradeableProxyImpl.at(
         '0x2aa297c3208bd98a9a477514d3c80ace570a6dee')
 
     staking = interface.IAny(staking)
-    proxy_admin.upgrade(staking, staking_impl_v2, {
-                        'from': deployer, 'gas_price': gas_strategy})
 
-    print(proxy_admin.getProxyImplementation(staking))
+    proxy_admin.upgrade(staking, staking_impl_v2, {'from': deployer})
 
     # approve staking contract
     stake_amt = 10 * 10**18
     alpha.approve(staking, stake_amt, {
-                  'from': deployer, 'gas_price': gas_strategy})
+                  'from': deployer})
 
     # stake 10 ALPHA
-    staking.stake(stake_amt, {'from': deployer, 'gas_price': gas_strategy})
+    staking.stake(stake_amt, {'from': deployer})

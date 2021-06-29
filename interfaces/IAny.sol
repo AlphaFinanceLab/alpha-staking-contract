@@ -54,10 +54,6 @@ interface IAny {
 
     function acceptGovernor() external;
 
-    function governor() external view returns (address);
-
-    function pendingGovernor() external view returns (address);
-
     function skim(uint) external;
     
     function extract(uint) external;
