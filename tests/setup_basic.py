@@ -2,29 +2,36 @@ import pytest
 from brownie import interface
 from utils import *
 
+
 @pytest.fixture(scope='function')
 def deployer(a):
     return a[0]
+
 
 @pytest.fixture(scope='function')
 def alice(a):
     return a[1]
 
+
 @pytest.fixture(scope='function')
 def bob(a):
     return a[2]
+
 
 @pytest.fixture(scope='function')
 def worker(a):
     return a[9]
 
+
 @pytest.fixture(scope='function')
 def alpha(a, MockERC20):
     return MockERC20.deploy('ALPHA', 'ALPHA', 18, {'from': a[0]})
 
+
 @pytest.fixture(scope='function')
 def proxy_admin(a, deployer, ProxyAdminImpl):
     return ProxyAdminImpl.deploy({'from': deployer})
+
 
 @pytest.fixture(scope='function')
 def staking(a, alpha, deployer, alice, bob, worker, proxy_admin, AlphaStaking, TransparentUpgradeableProxyImpl):
@@ -46,6 +53,20 @@ def staking(a, alpha, deployer, alice, bob, worker, proxy_admin, AlphaStaking, T
 
     return contract
 
+
+@pytest.fixture(scope='function')
+def staking_v2(deployer, AlphaStakingV2):
+    staking_impl_v2 = AlphaStakingV2.deploy({'from': deployer})
+    return staking_impl_v2
+
+
+@pytest.fixture(scope='function')
+def upgraded_staking(deployer, staking, proxy_admin, AlphaStakingV2):
+    staking_impl_v2 = AlphaStakingV2.deploy({'from': deployer})
+    proxy_admin.upgrade(staking, staking_impl_v2)
+    return staking
+
+
 @pytest.fixture(scope='function')
 def pure_staking(a, alpha, deployer, alice, bob, worker, proxy_admin, AlphaStaking, TransparentUpgradeableProxyImpl):
     '''
@@ -56,4 +77,3 @@ def pure_staking(a, alpha, deployer, alice, bob, worker, proxy_admin, AlphaStaki
         staking_impl, proxy_admin, staking_impl.initialize.encode_input(alpha, deployer), {'from': deployer})
     contract = interface.IAny(contract)
     return contract
-
