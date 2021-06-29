@@ -6,7 +6,7 @@ import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/utils/ReentrancyGuar
 import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/math/SafeMath.sol';
 import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/proxy/Initializable.sol';
 
-contract AlphaStaking is Initializable, ReentrancyGuard {
+contract AlphaStakingV2 is Initializable, ReentrancyGuard {
   using SafeERC20 for IERC20;
   using SafeMath for uint;
 

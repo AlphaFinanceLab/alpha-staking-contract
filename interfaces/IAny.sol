@@ -1,6 +1,15 @@
 pragma solidity 0.6.12;
 
 interface IAny {
+
+    function STATUS_READY() external view returns (uint);
+
+    function STATUS_UNBONDING() external view returns (uint);
+
+    function UNBONDING_DURATION() external view returns (uint);
+
+    function WITHDRAW_DURATION() external view returns (uint);
+
     function setWorker(address) external;
 
     function stake(uint) external;
@@ -14,6 +23,12 @@ interface IAny {
     function approve(address, uint) external;
 
     function reward(uint) external;
+
+    function alpha() external view returns (address);
+
+    function governor() external view returns (address);
+
+    function pendingGovernor() external view returns (address);
 
     function worker() external view returns (address);
 
