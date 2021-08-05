@@ -3,111 +3,119 @@ import brownie
 
 
 def test_unbond_reward(a, staking, deployer, alice, bob, worker, alpha):
-    alice_stake_amt = 10**18
-    bob_stake_amt = 3 * 10**18
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
 
     # setup stake
-    staking.stake(alice_stake_amt, {'from': alice})
-    staking.stake(bob_stake_amt, {'from': bob})
+    staking.stake(alice_stake_amt, {"from": alice})
+    staking.stake(bob_stake_amt, {"from": bob})
 
     ####################################################################################
-    print('===============================================')
-    print('1. unbond -> reward (before 7 days) -> withdraw. still get reward')
+    print("===============================================")
+    print("1. unbond -> reward (before 7 days) -> withdraw. still get reward")
 
-    staking.unbond(alice_stake_amt // 4, {'from': alice})
+    staking.unbond(alice_stake_amt // 4, {"from": alice})
 
-    reward_amt = 4 * 10**18
+    reward_amt = 4 * 10 ** 18
 
-    staking.reward(reward_amt, {'from': worker})  # reward before 7 days
+    staking.reward(reward_amt, {"from": worker})  # reward before 7 days
 
     chain.sleep(7 * 86400)
 
     prevAliceBal = alpha.balanceOf(alice)
 
-    staking.withdraw({'from': alice})
+    staking.withdraw({"from": alice})
 
     curAliceBal = alpha.balanceOf(alice)
 
-    assert curAliceBal - prevAliceBal == alice_stake_amt // 4 * \
-        2, 'incorrect withdraw amount (should get reward)'
+    assert (
+        curAliceBal - prevAliceBal == alice_stake_amt // 4 * 2
+    ), "incorrect withdraw amount (should get reward)"
 
     ####################################################################################
-    print('===============================================')
-    print('2. unbond -> reward (after 7 days) -> withdraw. still get reward')
+    print("===============================================")
+    print("2. unbond -> reward (after 7 days) -> withdraw. still get reward")
 
-    staking.unbond(alice_stake_amt // 4, {'from': alice})
+    staking.unbond(alice_stake_amt // 4, {"from": alice})
 
-    reward_amt = 75 * 10**17
+    reward_amt = 75 * 10 ** 17
 
     chain.sleep(7 * 86400 + 10)
 
-    staking.reward(reward_amt, {'from': worker})  # reward after 7 days
+    staking.reward(reward_amt, {"from": worker})  # reward after 7 days
 
     prevAliceBal = alpha.balanceOf(alice)
 
-    staking.withdraw({'from': alice})
+    staking.withdraw({"from": alice})
 
     curAliceBal = alpha.balanceOf(alice)
 
-    assert curAliceBal - prevAliceBal == alice_stake_amt // 4 * \
-        4, 'incorrect withdraw amount (should get reward)'
+    assert (
+        curAliceBal - prevAliceBal == alice_stake_amt // 4 * 4
+    ), "incorrect withdraw amount (should get reward)"
 
 
-def test_unbond_reward_cross_upgrade_period(a, staking, staking_v2, proxy_admin, deployer, alice, bob, worker, alpha):
-    alice_stake_amt = 10**18
-    bob_stake_amt = 3 * 10**18
+def test_unbond_reward_cross_upgrade_period(
+    a, staking, staking_v2, proxy_admin, deployer, alice, bob, worker, alpha
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
 
     # setup stake
-    staking.stake(alice_stake_amt, {'from': alice})
-    staking.stake(bob_stake_amt, {'from': bob})
+    staking.stake(alice_stake_amt, {"from": alice})
+    staking.stake(bob_stake_amt, {"from": bob})
 
     ####################################################################################
-    print('===============================================')
-    print('1. unbond -> reward (after 7 days) -> withdraw. still get reward ')
+    print("===============================================")
+    print("1. unbond -> reward (after 7 days) -> withdraw. still get reward ")
 
-    staking.unbond(alice_stake_amt // 4, {'from': alice})
+    staking.unbond(alice_stake_amt // 4, {"from": alice})
 
-    reward_amt = 4 * 10**18
+    reward_amt = 4 * 10 ** 18
 
-    staking.reward(reward_amt, {'from': worker})  # reward before 7 days
+    staking.reward(reward_amt, {"from": worker})  # reward before 7 days
 
     chain.sleep(7 * 86400 + 10)
 
     prevAliceBal = alpha.balanceOf(alice)
 
-    staking.withdraw({'from': alice})
+    staking.withdraw({"from": alice})
 
     curAliceBal = alpha.balanceOf(alice)
 
-    assert curAliceBal - prevAliceBal == alice_stake_amt // 4 * \
-        2, 'incorrect withdraw amount (should get reward)'
+    assert (
+        curAliceBal - prevAliceBal == alice_stake_amt // 4 * 2
+    ), "incorrect withdraw amount (should get reward)"
 
     ####################################################################################
-    print('===============================================')
-    print('2. unbond -> reward (after 7 days) -> upgrade -> withdraw fail -> reward (after another 23 days) -> withdraw. get reward')
+    print("===============================================")
+    print(
+        "2. unbond -> reward (after 7 days) -> upgrade -> withdraw fail -> reward (after another 23 days) -> withdraw. get reward"
+    )
 
-    staking.unbond(alice_stake_amt // 4, {'from': alice})
+    staking.unbond(alice_stake_amt // 4, {"from": alice})
 
-    reward_amt = 75 * 10**17
+    reward_amt = 75 * 10 ** 17
 
     chain.sleep(7 * 86400 + 10)
 
     # upgrade to 30days
     proxy_admin.upgrade(staking, staking_v2)
 
-    staking.reward(reward_amt, {'from': worker})  # reward after 7 days
+    staking.reward(reward_amt, {"from": worker})  # reward after 7 days
 
     prevAliceBal = alpha.balanceOf(alice)
 
-    with brownie.reverts('withdraw/not-valid'):
-        staking.withdraw({'from': alice})
+    with brownie.reverts("withdraw/not-valid"):
+        staking.withdraw({"from": alice})
 
     # wait
     chain.sleep(23 * 86400 + 10)
 
-    staking.withdraw({'from': alice})
+    staking.withdraw({"from": alice})
 
     curAliceBal = alpha.balanceOf(alice)
 
-    assert curAliceBal - prevAliceBal == alice_stake_amt // 4 * \
-        4, 'incorrect withdraw amount (should get reward)'
+    assert (
+        curAliceBal - prevAliceBal == alice_stake_amt // 4 * 4
+    ), "incorrect withdraw amount (should get reward)"

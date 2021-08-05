@@ -20,6 +20,9 @@ def test_unchange_parameter_after_upgrade(staking, staking_v2, proxy_admin, alic
     assert (
         prev_STATUS_UNBONDING == staking.STATUS_UNBONDING()
     ), "STATUS_UNBONDING must be the same"
+    assert (
+        prev_WITHDRAW_DURATION == staking.WITHDRAW_DURATION()
+    ), "WITHDRAW_DURATION must be the same"
     assert prev_alpha == staking.alpha(), "alpha must be the same"
     assert prev_governor == staking.governor(), "governor must be the same"
     assert (
