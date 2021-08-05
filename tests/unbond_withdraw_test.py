@@ -200,7 +200,7 @@ def test_withdraw_after_new_unbond_period_expire(
     prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
     staking.unbond(prev_share, {"from": alice})
 
-    chain.sleep((31 * 86400) + (7 * 86400))
+    chain.sleep(33 * 86400 + 1)
 
     with brownie.reverts("withdraw/already-expired"):
         staking.withdraw({"from": alice})
