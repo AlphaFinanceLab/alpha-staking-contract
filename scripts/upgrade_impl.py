@@ -33,9 +33,9 @@ def main():
 
     proxy_admin.upgrade(staking, staking_impl_v2, {"from": deployer})
 
-    # approve staking contract
-    stake_amt = 10 * 10 ** 18
-    alpha.approve(staking, stake_amt, {"from": deployer})
+    # # approve staking contract
+    # stake_amt = 10 * 10 ** 18
+    # alpha.approve(staking, stake_amt, {"from": deployer})
 
-    # stake 10 ALPHA
-    staking.stake(stake_amt, {"from": deployer})
+    # # stake 10 ALPHA
+    # staking.stake(stake_amt, {"from": deployer})
