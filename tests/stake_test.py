@@ -35,7 +35,7 @@ def test_single_stake_after_upgrade(a, alice, worker, alpha, upgraded_staking):
         upgraded_staking.getStakeValue(alice) == stake_amt + reward_amt
     ), "incorrect reward to alice"
     assert (
-        alpha.balanceOf(staking) == stake_amt + reward_amt
+        alpha.balanceOf(upgraded_staking) == stake_amt + reward_amt
     ), "incorrect alpha in staking"
 
 

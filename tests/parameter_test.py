@@ -6,7 +6,6 @@ import brownie
 def test_unchange_parameter_after_upgrade(staking, staking_v2, proxy_admin, alice):
     prev_STATUS_READY = staking.STATUS_READY()
     prev_STATUS_UNBONDING = staking.STATUS_UNBONDING()
-    prev_WITHDRAW_DURATION = staking.WITHDRAW_DURATION()
     prev_alpha = staking.alpha()
     prev_governor = staking.governor()
     prev_pendingGovernor = staking.pendingGovernor()
@@ -21,9 +20,6 @@ def test_unchange_parameter_after_upgrade(staking, staking_v2, proxy_admin, alic
     assert (
         prev_STATUS_UNBONDING == staking.STATUS_UNBONDING()
     ), "STATUS_UNBONDING must be the same"
-    assert (
-        prev_WITHDRAW_DURATION == staking.WITHDRAW_DURATION()
-    ), "WITHDRAW_DURATION must be the same"
     assert prev_alpha == staking.alpha(), "alpha must be the same"
     assert prev_governor == staking.governor(), "governor must be the same"
     assert (
@@ -39,6 +35,7 @@ def test_unchange_parameter_after_upgrade(staking, staking_v2, proxy_admin, alic
 
 def test_change_parameter_after_upgrade(staking, staking_v2, proxy_admin, alice):
     prev_UNBONDING_DURATION = staking.UNBONDING_DURATION()
+    prev_WITHDRAW_DURATION = staking.WITHDRAW_DURATION()
     prev_impl = proxy_admin.getProxyImplementation(staking)
 
     proxy_admin.upgrade(staking, staking_v2)
@@ -46,4 +43,7 @@ def test_change_parameter_after_upgrade(staking, staking_v2, proxy_admin, alice)
     assert (
         prev_UNBONDING_DURATION != staking.UNBONDING_DURATION()
     ), "UNBONDING_DURATION must change"
+    assert (
+        prev_WITHDRAW_DURATION != staking.WITHDRAW_DURATION()
+    ), "WITHDRAW_DURATION must change"
     assert prev_impl != proxy_admin.getProxyImplementation(staking)
