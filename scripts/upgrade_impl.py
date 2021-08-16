@@ -19,17 +19,6 @@ gas_strategy = GasNowScalingStrategy(
 network.gas_price(gas_strategy)
 
 
-def test_stake_v1(stake_v1, stake_v2, alice):
-    stake_data_v1 = stake_v1.users(alice)
-    print("stake_data_v1", stake_data_v1)
-    # # approve staking contract
-    # stake_amt = 10 * 10 ** 18
-    # alpha.approve(staking, stake_amt, {"from": deployer})
-
-    # # stake 10 ALPHA
-    # staking.stake(stake_amt, {"from": deployer})
-
-
 def main():
     deployer = accounts.at("0xB593d82d53e2c187dc49673709a6E9f806cdC835", force=True)
     # deployer = accounts.load('gh')
