@@ -200,6 +200,7 @@ def main():
             - start_time
         )
 
+        # alice withdraw
         total_alpha_v2 = staking.totalAlpha()
         total_share_v2 = staking.totalShare()
         alice_before = alpha.balanceOf(alice)
