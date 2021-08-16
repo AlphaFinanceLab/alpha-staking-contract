@@ -164,9 +164,12 @@ def main():
             assert False
         except VirtualMachineError:
             pass
-        chain.sleep(100)
-        bob_before = alpha.balanceOf(bob)
 
+        chain.sleep(100)
+
+        bob_before = alpha.balanceOf(bob)
+        total_alpha_v2 = staking.totalAlpha()
+        total_share_v2 = staking.totalShare()
         staking.withdraw({"from": bob, "gas_price": 0})
         bob_after = alpha.balanceOf(bob)
         (
@@ -175,7 +178,9 @@ def main():
             bob_data_unbond_time,
             bob_data_unbond_share,
         ) = staking.users(bob)
-        assert bob_after > bob_before, "bob withdraw fail"
+        assert bob_after - bob_before, (
+            bob_staking_v2_unbond_share * total_alpha_v2 // total_share_v2
+        )
         assert (
             bob_data_status == staking.STATUS_READY()
         ), "incorrect bob status after withdraw"
@@ -195,6 +200,8 @@ def main():
             - start_time
         )
 
+        total_alpha_v2 = staking.totalAlpha()
+        total_share_v2 = staking.totalShare()
         alice_before = alpha.balanceOf(alice)
         staking.withdraw({"from": alice, "gas_price": 0})
         alice_after = alpha.balanceOf(alice)
@@ -205,7 +212,10 @@ def main():
             alice_data_unbond_share,
         ) = staking.users(alice)
 
-        assert alice_after > alice_before, "alice withdraw fail"
+        assert (
+            alice_after - alice_before
+            == alice_staking_v2_share * total_alpha_v2 // total_share_v2
+        )
         assert (
             alice_data_status == staking.STATUS_READY()
         ), "incorrect alice status after withdraw"
