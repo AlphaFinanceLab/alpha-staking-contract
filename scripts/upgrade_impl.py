@@ -208,7 +208,7 @@ def main():
 
     proxy_admin = ProxyAdminImpl.at("0x090eCE252cEc5998Db765073D07fac77b8e60CB2")
     staking_impl_v2 = AlphaStakingV2.deploy({"from": deployer})
-    staking_impl_v2.initialize(alpha, deployer)
+    staking_impl_v2.initialize(alpha, deployer, {"from": deployer})
     staking = interface.IAny("0x2aa297c3208bd98a9a477514d3c80ace570a6dee")
 
     # comment this function when upgrade contract
