@@ -42,24 +42,26 @@ def test_not_enough_alpha_before_upgrade(
         staking.skim(1, {"from": deployer})
 
 
-def test_not_enough_alpha_before_upgrade(upgraded_staking, deployer, alpha, alice, bob):
+def test_not_enough_alpha_before_upgrade(
+    upgraded_staking_v2, deployer, alpha, alice, bob
+):
     assert (
-        alpha.balanceOf(upgraded_staking) == 0
-    ), "invalid initial alpha in upgraded_staking contract"
+        alpha.balanceOf(upgraded_staking_v2) == 0
+    ), "invalid initial alpha in upgraded_staking_v2 contract"
 
     with brownie.reverts("ERC20: transfer amount exceeds balance"):
-        upgraded_staking.skim(1, {"from": deployer})
+        upgraded_staking_v2.skim(1, {"from": deployer})
 
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
-    upgraded_staking.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v2.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v2.stake(bob_stake_amt, {"from": bob})
 
-    assert alpha.balanceOf(upgraded_staking) > 0, "invalid alpha after stake"
+    assert alpha.balanceOf(upgraded_staking_v2) > 0, "invalid alpha after stake"
 
     with brownie.reverts("skim/not-enough-balance"):
-        upgraded_staking.skim(1, {"from": deployer})
+        upgraded_staking_v2.skim(1, {"from": deployer})
 
 
 def test_not_gov_skim(staking, bob):
@@ -67,9 +69,9 @@ def test_not_gov_skim(staking, bob):
         staking.skim(0, {"from": bob})
 
 
-def test_not_gov_skim_after_upgrade(upgraded_staking, bob):
+def test_not_gov_skim_after_upgrade(upgraded_staking_v2, bob):
     with brownie.reverts("onlyGov/not-governor"):
-        upgraded_staking.skim(0, {"from": bob})
+        upgraded_staking_v2.skim(0, {"from": bob})
 
 
 def test_skim(a, deployer, alice, bob, worker, alpha, staking):
@@ -108,17 +110,19 @@ def test_skim_before_upgrade(
     assert curDeployerBal - prevDeployerBal == 1000, "incorrect skim amount"
 
 
-def test_skim_after_upgrade(a, deployer, alice, bob, worker, alpha, upgraded_staking):
+def test_skim_after_upgrade(
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v2
+):
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
-    upgraded_staking.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v2.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v2.stake(bob_stake_amt, {"from": bob})
 
-    alpha.transfer(upgraded_staking, 1000, {"from": alice})
+    alpha.transfer(upgraded_staking_v2, 1000, {"from": alice})
     prevDeployerBal = alpha.balanceOf(deployer)
 
-    upgraded_staking.skim(1000, {"from": deployer})
+    upgraded_staking_v2.skim(1000, {"from": deployer})
     curDeployerBal = alpha.balanceOf(deployer)
 
     assert curDeployerBal - prevDeployerBal == 1000, "incorrect skim amount"

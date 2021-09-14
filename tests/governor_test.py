@@ -7,8 +7,8 @@ def test_initial_governor(staking, deployer):
     assert staking.governor() == deployer, "incorrect deployer governor"
 
 
-def test_initial_governor_after_upgrade(upgraded_staking, deployer):
-    assert upgraded_staking.governor() == deployer, "incorrect deployer governor"
+def test_initial_governor_after_upgrade(upgraded_staking_v2, deployer):
+    assert upgraded_staking_v2.governor() == deployer, "incorrect deployer governor"
 
 
 def test_pending_governor(staking):
@@ -17,9 +17,9 @@ def test_pending_governor(staking):
     ), "incorrect pending governor"
 
 
-def test_pending_governor_after_upgrade(upgraded_staking):
+def test_pending_governor_after_upgrade(upgraded_staking_v2):
     assert (
-        upgraded_staking.pendingGovernor()
+        upgraded_staking_v2.pendingGovernor()
         == "0x0000000000000000000000000000000000000000"
     ), "incorrect pending governor"
 
@@ -39,13 +39,13 @@ def test_set_governor_before_upgraded(
     assert staking.pendingGovernor() == alice, "incorrect pending governor after set"
 
 
-def test_set_governor_after_upgrade(upgraded_staking, deployer, alice):
-    upgraded_staking.setPendingGovernor(alice, {"from": deployer})
+def test_set_governor_after_upgrade(upgraded_staking_v2, deployer, alice):
+    upgraded_staking_v2.setPendingGovernor(alice, {"from": deployer})
     assert (
-        upgraded_staking.governor() == deployer
+        upgraded_staking_v2.governor() == deployer
     ), "incorrect deployer governor after set"
     assert (
-        upgraded_staking.pendingGovernor() == alice
+        upgraded_staking_v2.pendingGovernor() == alice
     ), "incorrect pending governor after set"
 
 
@@ -54,9 +54,9 @@ def test_not_gov_set_pending_governor(deployer, staking, alice, bob):
         staking.setPendingGovernor(alice, {"from": bob})
 
 
-def test_not_gov_set_after_upgrade(deployer, upgraded_staking, alice, bob):
+def test_not_gov_set_after_upgrade(deployer, upgraded_staking_v2, alice, bob):
     with brownie.reverts("onlyGov/not-governor"):
-        upgraded_staking.setPendingGovernor(alice, {"from": bob})
+        upgraded_staking_v2.setPendingGovernor(alice, {"from": bob})
 
 
 def test_accept_governor(staking, alice, deployer):
@@ -80,14 +80,14 @@ def test_accept_governor_before_upgrade(
     ), "incorrect pending governor after accept"
 
 
-def test_accept_governor_after_upgrade(upgraded_staking, alice, deployer):
-    upgraded_staking.setPendingGovernor(alice, {"from": deployer})
-    upgraded_staking.acceptGovernor({"from": alice})
+def test_accept_governor_after_upgrade(upgraded_staking_v2, alice, deployer):
+    upgraded_staking_v2.setPendingGovernor(alice, {"from": deployer})
+    upgraded_staking_v2.acceptGovernor({"from": alice})
     assert (
-        upgraded_staking.governor() == alice
+        upgraded_staking_v2.governor() == alice
     ), "incorrect deployer governor after accept"
     assert (
-        upgraded_staking.pendingGovernor()
+        upgraded_staking_v2.pendingGovernor()
         == "0x0000000000000000000000000000000000000000"
     ), "incorrect pending governor after accept"
 
@@ -110,13 +110,13 @@ def test_not_pending_accept_governor_before_upgrade(
 
 
 def test_not_pending_accept_governor_after_upgrade(
-    upgraded_staking, deployer, alice, bob
+    upgraded_staking_v2, deployer, alice, bob
 ):
-    upgraded_staking.setPendingGovernor(alice, {"from": deployer})
+    upgraded_staking_v2.setPendingGovernor(alice, {"from": deployer})
     with brownie.reverts("acceptGovernor/not-pending"):
-        upgraded_staking.acceptGovernor({"from": bob})
+        upgraded_staking_v2.acceptGovernor({"from": bob})
     assert (
-        upgraded_staking.pendingGovernor() == alice
+        upgraded_staking_v2.pendingGovernor() == alice
     ), "incorrect pending governor after revert"
 
 
@@ -158,23 +158,23 @@ def test_set_governor_twice_before_upgrade(
     ), "incorrect pending governor after accept"
 
 
-def test_set_governor_twice_after_upgrade(upgraded_staking, deployer, alice, bob):
-    upgraded_staking.setPendingGovernor(alice, {"from": deployer})
+def test_set_governor_twice_after_upgrade(upgraded_staking_v2, deployer, alice, bob):
+    upgraded_staking_v2.setPendingGovernor(alice, {"from": deployer})
     assert (
-        upgraded_staking.pendingGovernor() == alice
+        upgraded_staking_v2.pendingGovernor() == alice
     ), "incorrect pending governor after set"
 
-    upgraded_staking.setPendingGovernor(bob, {"from": deployer})
+    upgraded_staking_v2.setPendingGovernor(bob, {"from": deployer})
     assert (
-        upgraded_staking.pendingGovernor() == bob
+        upgraded_staking_v2.pendingGovernor() == bob
     ), "incorrect pending governor after set"
 
     with brownie.reverts("acceptGovernor/not-pending"):
-        upgraded_staking.acceptGovernor({"from": alice})
+        upgraded_staking_v2.acceptGovernor({"from": alice})
 
-    upgraded_staking.acceptGovernor({"from": bob})
-    assert upgraded_staking.governor() == bob, "incorrect governor after accept"
+    upgraded_staking_v2.acceptGovernor({"from": bob})
+    assert upgraded_staking_v2.governor() == bob, "incorrect governor after accept"
     assert (
-        upgraded_staking.pendingGovernor()
+        upgraded_staking_v2.pendingGovernor()
         == "0x0000000000000000000000000000000000000000"
     ), "incorrect pending governor after accept"

@@ -26,27 +26,27 @@ def test_reward(a, deployer, alice, bob, staking):
     staking.reward(10 ** 18, {"from": bob})
 
 
-def test_reward_after_upgrade(a, deployer, alice, bob, upgraded_staking):
-    upgraded_staking.setWorker(bob, {"from": deployer})
+def test_reward_after_upgrade(a, deployer, alice, bob, upgraded_staking_v2):
+    upgraded_staking_v2.setWorker(bob, {"from": deployer})
 
     with brownie.reverts("reward/share-too-small"):
-        upgraded_staking.reward(0, {"from": deployer})
+        upgraded_staking_v2.reward(0, {"from": deployer})
 
     with brownie.reverts("reward/share-too-small"):
-        upgraded_staking.reward(0, {"from": bob})
+        upgraded_staking_v2.reward(0, {"from": bob})
 
-    upgraded_staking.stake(10 ** 18, {"from": alice})
-
-    with brownie.reverts("onlyWorker/not-worker"):
-        upgraded_staking.reward(0, {"from": alice})
+    upgraded_staking_v2.stake(10 ** 18, {"from": alice})
 
     with brownie.reverts("onlyWorker/not-worker"):
-        upgraded_staking.reward(10 ** 18, {"from": alice})
+        upgraded_staking_v2.reward(0, {"from": alice})
 
-    upgraded_staking.reward(0, {"from": deployer})
-    upgraded_staking.reward(0, {"from": bob})
-    upgraded_staking.reward(10 ** 18, {"from": deployer})
-    upgraded_staking.reward(10 ** 18, {"from": bob})
+    with brownie.reverts("onlyWorker/not-worker"):
+        upgraded_staking_v2.reward(10 ** 18, {"from": alice})
+
+    upgraded_staking_v2.reward(0, {"from": deployer})
+    upgraded_staking_v2.reward(0, {"from": bob})
+    upgraded_staking_v2.reward(10 ** 18, {"from": deployer})
+    upgraded_staking_v2.reward(10 ** 18, {"from": bob})
 
 
 def test_set_worker(deployer, alice, bob, pure_staking, alpha):

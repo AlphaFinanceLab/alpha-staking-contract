@@ -75,10 +75,18 @@ def staking_v2(deployer, AlphaStakingV2):
 
 
 @pytest.fixture(scope="function")
-def upgraded_staking(deployer, staking, proxy_admin, AlphaStakingV2):
+def staking_v3(deployer, AlphaStakingV3):
+    staking_impl_v3 = AlphaStakingV3.deploy({"from": deployer})
+    return staking_impl_v3
+
+
+@pytest.fixture(scope="function")
+def upgraded_staking_v2(deployer, staking, proxy_admin, AlphaStakingV2):
     staking_impl_v2 = AlphaStakingV2.deploy({"from": deployer})
     proxy_admin.upgrade(staking, staking_impl_v2)
     return staking
+
+
 
 
 @pytest.fixture(scope="function")

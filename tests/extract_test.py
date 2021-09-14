@@ -7,9 +7,9 @@ def test_not_gov_extract(a, alice, staking):
         staking.extract(1000, {"from": alice})
 
 
-def test_not_gov_extract_after_upgrade(a, alice, upgraded_staking):
+def test_not_gov_extract_after_upgrade(a, alice, upgraded_staking_v2):
     with brownie.reverts("onlyGov/not-governor"):
-        upgraded_staking.extract(1000, {"from": alice})
+        upgraded_staking_v2.extract(1000, {"from": alice})
 
 
 def test_worker_extract(a, alice, worker, staking):
@@ -18,10 +18,10 @@ def test_worker_extract(a, alice, worker, staking):
         staking.extract(1000, {"from": worker})
 
 
-def test_worker_extract_after_upgrade(a, alice, worker, upgraded_staking):
-    assert upgraded_staking.worker() == worker
+def test_worker_extract_after_upgrade(a, alice, worker, upgraded_staking_v2):
+    assert upgraded_staking_v2.worker() == worker
     with brownie.reverts("onlyGov/not-governor"):
-        upgraded_staking.extract(1000, {"from": worker})
+        upgraded_staking_v2.extract(1000, {"from": worker})
 
 
 def test_not_enough_alpha(a, alice, bob, deployer, staking):
@@ -41,11 +41,11 @@ def test_not_enough_alpha_before_upgrade(
         staking.extract(10 ** 18, {"from": deployer})
 
 
-def test_not_enough_alpha_after_upgrade(a, alice, bob, deployer, upgraded_staking):
+def test_not_enough_alpha_after_upgrade(a, alice, bob, deployer, upgraded_staking_v2):
     alice_stake_amt = 10 ** 18
-    upgraded_staking.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v2.stake(alice_stake_amt, {"from": alice})
     with brownie.reverts("extract/too-low-total-alpha"):
-        upgraded_staking.extract(10 ** 18, {"from": deployer})
+        upgraded_staking_v2.extract(10 ** 18, {"from": deployer})
 
 
 def test_extract(a, deployer, alice, bob, worker, alpha, staking):
@@ -83,17 +83,17 @@ def test_extract_before_upgrade(
 
 
 def test_extract_after_upgrade(
-    a, deployer, alice, bob, worker, alpha, upgraded_staking
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v2
 ):
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
-    upgraded_staking.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v2.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v2.stake(bob_stake_amt, {"from": bob})
 
     prevDeployerBal = alpha.balanceOf(deployer)
 
-    upgraded_staking.extract(1000, {"from": deployer})
+    upgraded_staking_v2.extract(1000, {"from": deployer})
 
     curDeployerBal = alpha.balanceOf(deployer)
     assert curDeployerBal - prevDeployerBal == 1000, "incorrect extract amount"
@@ -204,44 +204,44 @@ def test_extract_during_unbond_before_upgrade(
 
 
 def test_extract_during_unbond_after_upgrade(
-    a, deployer, alice, bob, worker, alpha, upgraded_staking
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v2
 ):
 
     alice_stake_amt = 200 * 10 ** 18
     bob_stake_amt = 200 * 10 ** 18
 
-    upgraded_staking.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v2.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v2.stake(bob_stake_amt, {"from": bob})
 
-    upgraded_staking.unbond(alice_stake_amt / 2, {"from": alice})
+    upgraded_staking_v2.unbond(alice_stake_amt / 2, {"from": alice})
 
     with brownie.reverts("withdraw/not-valid"):
-        upgraded_staking.withdraw({"from": alice})
+        upgraded_staking_v2.withdraw({"from": alice})
 
-    upgraded_staking.extract(100 * 10 ** 18, {"from": deployer})
+    upgraded_staking_v2.extract(100 * 10 ** 18, {"from": deployer})
 
     chain.sleep(30 * 86400)
 
     prv_alice_balance = alpha.balanceOf(alice)
-    upgraded_staking.withdraw({"from": alice})
+    upgraded_staking_v2.withdraw({"from": alice})
     cur_alice_balance = alpha.balanceOf(alice)
 
     assert (
         cur_alice_balance - prv_alice_balance
     ) == 75 * 10 ** 18, "incorrect withdraw amount"
 
-    upgraded_staking.unbond(alice_stake_amt / 2, {"from": alice})
-    upgraded_staking.unbond(bob_stake_amt / 2, {"from": bob})
+    upgraded_staking_v2.unbond(alice_stake_amt / 2, {"from": alice})
+    upgraded_staking_v2.unbond(bob_stake_amt / 2, {"from": bob})
 
-    upgraded_staking.extract(150 * 10 ** 18, {"from": deployer})
+    upgraded_staking_v2.extract(150 * 10 ** 18, {"from": deployer})
 
     chain.sleep(30 * 86400)
 
     prv_alice_balance = alpha.balanceOf(alice)
     prv_bob_balance = alpha.balanceOf(bob)
 
-    upgraded_staking.withdraw({"from": alice})
-    upgraded_staking.withdraw({"from": bob})
+    upgraded_staking_v2.withdraw({"from": alice})
+    upgraded_staking_v2.withdraw({"from": bob})
 
     cur_alice_balance = alpha.balanceOf(alice)
     cur_bob_balance = alpha.balanceOf(bob)
@@ -327,27 +327,27 @@ def test_staking_after_extract_before_upgrade(
 
 
 def test_staking_after_extract_and_upgrade(
-    a, deployer, alice, bob, worker, alpha, upgraded_staking
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v2
 ):
 
     alice_stake_amt = 200 * 10 ** 18
     bob_stake_amt = 200 * 10 ** 18
 
-    upgraded_staking.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v2.stake(alice_stake_amt, {"from": alice})
 
-    upgraded_staking.extract(100 * 10 ** 18, {"from": deployer})
-    upgraded_staking.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v2.extract(100 * 10 ** 18, {"from": deployer})
+    upgraded_staking_v2.stake(bob_stake_amt, {"from": bob})
 
-    upgraded_staking.unbond(alice_stake_amt, {"from": alice})
-    upgraded_staking.unbond(bob_stake_amt * 2 * 99 // 100, {"from": bob})
+    upgraded_staking_v2.unbond(alice_stake_amt, {"from": alice})
+    upgraded_staking_v2.unbond(bob_stake_amt * 2 * 99 // 100, {"from": bob})
 
     chain.sleep(30 * 86400)
 
     prv_alice_balance = alpha.balanceOf(alice)
     prv_bob_balance = alpha.balanceOf(bob)
 
-    upgraded_staking.withdraw({"from": alice})
-    upgraded_staking.withdraw({"from": bob})
+    upgraded_staking_v2.withdraw({"from": alice})
+    upgraded_staking_v2.withdraw({"from": bob})
 
     cur_alice_balance = alpha.balanceOf(alice)
     cur_bob_balance = alpha.balanceOf(bob)
@@ -398,21 +398,21 @@ def test_withdraw_all_before_upgrade(
 
 
 def test_withdraw_all_after_upgrade(
-    a, deployer, alice, bob, worker, alpha, upgraded_staking
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v2
 ):
 
     alice_stake_amt = 200 * 10 ** 18
 
-    upgraded_staking.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v2.stake(alice_stake_amt, {"from": alice})
 
-    upgraded_staking.unbond(alice_stake_amt, {"from": alice})
+    upgraded_staking_v2.unbond(alice_stake_amt, {"from": alice})
 
     chain.sleep(7 * 86400)
 
     with brownie.reverts("withdraw/not-valid"):
-        upgraded_staking.withdraw({"from": alice})
+        upgraded_staking_v2.withdraw({"from": alice})
 
     chain.sleep(23 * 86400)
 
     with brownie.reverts("withdraw/too-low-total-alpha"):
-        upgraded_staking.withdraw({"from": alice})
+        upgraded_staking_v2.withdraw({"from": alice})

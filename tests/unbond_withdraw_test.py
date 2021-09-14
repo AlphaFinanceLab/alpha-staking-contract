@@ -44,25 +44,28 @@ def test_unbond_withdraw(a, deployer, alice, bob, worker, alpha, staking):
 
 
 def test_unbond_withdraw_after_uprade(
-    a, deployer, alice, bob, worker, alpha, upgraded_staking
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v2
 ):
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
     # setup stake
-    upgraded_staking.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v2.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v2.stake(bob_stake_amt, {"from": bob})
 
-    prev_status, prev_share, prev_unbondtime, prev_unbondshare = upgraded_staking.users(
-        alice
-    )
+    (
+        prev_status,
+        prev_share,
+        prev_unbondtime,
+        prev_unbondshare,
+    ) = upgraded_staking_v2.users(alice)
     assert prev_status == 0, "incorrect alice status before unbond"
     assert prev_unbondtime == 0, "incorrect unbond time before unbond"
     assert prev_unbondshare == 0, "incorrect unbond share before unbond"
 
-    tx = upgraded_staking.unbond(prev_share // 3, {"from": alice})
+    tx = upgraded_staking_v2.unbond(prev_share // 3, {"from": alice})
 
-    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking.users(
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v2.users(
         alice
     )
     assert cur_status == 1, "incorrect alice status after unbond"
@@ -73,7 +76,7 @@ def test_unbond_withdraw_after_uprade(
 
     prevAliceBal = alpha.balanceOf(alice)
 
-    upgraded_staking.withdraw({"from": alice})
+    upgraded_staking_v2.withdraw({"from": alice})
 
     curAliceBal = alpha.balanceOf(alice)
 
@@ -82,7 +85,7 @@ def test_unbond_withdraw_after_uprade(
     ), "incorrect withdraw amount"
 
     # check status resets
-    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking.users(
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v2.users(
         alice
     )
     assert cur_status == 0, "incorrect alice status after withdraw"
