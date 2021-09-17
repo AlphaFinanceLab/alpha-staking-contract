@@ -59,4 +59,8 @@ interface IAny {
     function extract(uint) external;
 
     function getProxyImplementation(address) external view returns (address);
+
+    function setMerkle(address) external;
+
+    function stakeFor(address owner, uint amount) external returns (uint share);
 }
