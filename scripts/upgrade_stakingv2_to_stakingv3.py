@@ -218,6 +218,15 @@ def test_upgrade(alpha, staking, staking_impl_v3, proxy_admin, deployer):
     merkle.updateMerkleRoot(root, {"from": deployer})
     alpha.transfer(merkle, sum(rewards.values()), {"from": deployer})
 
+    # try to claim eve reward by bob, this should be revert
+    try:
+        merkle.claimAndStake(
+            rewards[eve.address], proof[1], {"from": bob, "gas_price": 0}
+        )
+        assert False
+    except VirtualMachineError:
+        pass
+
     merkle.claimAndStake(rewards[eve.address], proof[1], {"from": eve, "gas_price": 0})
 
     total_alpha_v3 = staking.totalAlpha()
