@@ -12,6 +12,7 @@ contract AlphaStakingV3 is Initializable, ReentrancyGuard {
 
   event SetWorker(address worker);
   event Stake(address owner, uint share, uint amount);
+  event StakeFor(address staker, address owner);
   event Unbond(address owner, uint unbondTime, uint unbondShare);
   event Withdraw(address owner, uint withdrawShare, uint withdrawAmount);
   event CancelUnbond(address owner, uint unbondTime, uint unbondShare);
@@ -162,8 +163,8 @@ contract AlphaStakingV3 is Initializable, ReentrancyGuard {
     external
     onlyMerkle
     nonReentrant
-    returns (uint share)
   {
-    share = _stake(owner, amount);
+    _stake(owner, amount);
+    emit StakeFor(msg.sender, owner);
   }
 }
