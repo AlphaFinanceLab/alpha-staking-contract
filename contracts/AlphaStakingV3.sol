@@ -90,7 +90,7 @@ contract AlphaStakingV3 is Initializable, ReentrancyGuard {
     _stake(msg.sender, amount);
   }
 
-  function _stake(address owner, uint amount) internal returns (uint share) {
+  function _stake(address owner, uint amount) internal {
     require(amount >= 1e18, 'stake/amount-too-small');
     Data storage data = users[owner];
     if (data.status != STATUS_READY) {
@@ -100,7 +100,7 @@ contract AlphaStakingV3 is Initializable, ReentrancyGuard {
       data.unbondShare = 0;
     }
     alpha.safeTransferFrom(msg.sender, address(this), amount);
-    share = totalAlpha == 0 ? amount : amount.mul(totalShare).div(totalAlpha);
+    uint share = totalAlpha == 0 ? amount : amount.mul(totalShare).div(totalAlpha);
     totalAlpha = totalAlpha.add(amount);
     totalShare = totalShare.add(share);
     data.share = data.share.add(share);
