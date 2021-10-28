@@ -12,12 +12,8 @@ from .utils import generate_merkle
 
 from brownie.exceptions import VirtualMachineError
 
-
-gas_strategy = GasNowScalingStrategy(
-    initial_speed="fast", max_speed="fast", increment=1.085, block_duration=20
-)
-
-network.gas_price(gas_strategy)
+network.priority_fee("1 gwei")
+network.max_fee("100 gwei")
 
 
 def test_upgrade(alpha, staking, staking_impl_v3, proxy_admin, deployer):
@@ -168,7 +164,7 @@ def test_upgrade(alpha, staking, staking_impl_v3, proxy_admin, deployer):
     assert bob_data_unbond_share == 0, "incorrect bob unbond share after withdraw"
 
     try:
-        staking.withdraw({"from": alice})
+        staking.withdraw({"from": alice, "gas_price": 0})
         assert False
     except VirtualMachineError:
         pass
@@ -247,6 +243,8 @@ def test_upgrade(alpha, staking, staking_impl_v3, proxy_admin, deployer):
     ), "incorrect eve share after stake"
     assert eve_staking_v3_unbond_time == 0, "incorrect eve unbond time after stake"
     assert eve_staking_v3_unbond_share == 0, "incorrect eve unbond share after stake"
+
+    print("Test pass!!!")
 
 
 def main():
