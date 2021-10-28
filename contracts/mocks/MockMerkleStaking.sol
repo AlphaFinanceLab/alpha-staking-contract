@@ -10,7 +10,7 @@ import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/math/SafeMath.sol';
 import '../../interfaces/IMerkleStaking.sol';
 import '../../interfaces/IAlphaStaking.sol';
 
-contract MockMerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
+contract MerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
   using SafeERC20 for IERC20;
   using SafeMath for uint;
 
@@ -23,7 +23,7 @@ contract MockMerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
   event UpdateStaking(address staking);
   event Deposit(uint amount);
   event Withdraw(uint amount);
-  event ClaimAndStake(address indexed account, uint claimAmount, uint sAlphaShare);
+  event ClaimAndStake(address indexed account, uint claimAmount);
 
   constructor(
     address _token,
@@ -39,18 +39,8 @@ contract MockMerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
     _updateMerkleRoot(_root);
   }
 
-  function _updateMerkleRoot(bytes32 _root) internal {
-    root = _root;
-    emit UpdateRoot(_root);
-  }
-
-  function updateStaking(address _staking) external onlyOwner {
+  function updateStaking(address _staking) external override onlyOwner {
     _updateStaking(_staking);
-  }
-
-  function _updateStaking(address _staking) internal {
-    staking = IAlphaStaking(_staking);
-    emit UpdateStaking(_staking);
   }
 
   function deposit(uint _amount) external override onlyOwner {
@@ -70,9 +60,14 @@ contract MockMerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
 
     require(claimAmount > 0, "claim-and-stake: account don't have reward to claim");
     IERC20(token).approve(address(staking), claimAmount);
-    uint share = staking.stakeFor(msg.sender, claimAmount);
+    staking.stakeFor(msg.sender, claimAmount);
     claimed[msg.sender] = _reward;
-    emit ClaimAndStake(msg.sender, claimAmount, share);
+    emit ClaimAndStake(msg.sender, claimAmount);
+  }
+
+  // @dev withdraw tokens in unexpected scenarios. Emergency use only!
+  function extract(address _token, uint _amount) external onlyOwner {
+    IERC20(_token).safeTransfer(msg.sender, _amount);
   }
 
   /// @dev not allow renouncing.
@@ -80,8 +75,13 @@ contract MockMerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
     revert('renounce-ownership: not allowed');
   }
 
-  // @dev withdraw tokens in unexpected scenarios. Emergency use only!
-  function extract(address _token, uint _amount) external onlyOwner {
-    IERC20(_token).safeTransfer(msg.sender, _amount);
+  function _updateMerkleRoot(bytes32 _root) internal {
+    root = _root;
+    emit UpdateRoot(_root);
+  }
+
+  function _updateStaking(address _staking) internal {
+    staking = IAlphaStaking(_staking);
+    emit UpdateStaking(_staking);
   }
 }

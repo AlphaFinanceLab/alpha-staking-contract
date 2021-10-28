@@ -8,6 +8,9 @@ interface IMerkleStaking {
   // Updates merkle root to the new one.
   function updateMerkleRoot(bytes32 _root) external;
 
+  // Updates staking contract to the new one;
+  function updateStaking(address _staking) external;
+
   // Deposits reward tokens.
   function deposit(uint _amount) external;
 
