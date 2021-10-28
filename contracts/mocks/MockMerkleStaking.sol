@@ -10,7 +10,7 @@ import 'OpenZeppelin/openzeppelin-contracts@3.2.0/contracts/math/SafeMath.sol';
 import '../../interfaces/IMerkleStaking.sol';
 import '../../interfaces/IAlphaStaking.sol';
 
-contract MerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
+contract MockMerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
   using SafeERC20 for IERC20;
   using SafeMath for uint;
 
