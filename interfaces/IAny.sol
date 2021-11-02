@@ -62,5 +62,5 @@ interface IAny {
 
     function setMerkle(address) external;
 
-    function stakeFor(address owner, uint amount) external returns (uint share);
+    function stakeFor(address owner, uint amount) external;
 }
