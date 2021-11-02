@@ -19,7 +19,7 @@ interface IAlphaStaking {
 
   function getStakeValue(address) external view returns (uint);
 
-  function stake(uint) external;
+  function stake(address, uint) external;
 
   function unbond(uint) external;
 
