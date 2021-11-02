@@ -254,6 +254,8 @@ def main():
     # deployer = accounts.load('gh')
 
     alpha = interface.IAny("0xa1faa113cbE53436Df28FF0aEe54275c13B40975")
+    # TODO: Update merkle address before deploy
+    merkle = ""
 
     proxy_admin = ProxyAdminImpl.at("0x090eCE252cEc5998Db765073D07fac77b8e60CB2")
     staking_impl_v3 = AlphaStakingV3.deploy({"from": deployer})
@@ -265,3 +267,5 @@ def main():
 
     # upgrade
     proxy_admin.upgrade(staking, staking_impl_v3, {"from": deployer})
+
+    staking.setMerkle(merkle, {"from": deployer})
