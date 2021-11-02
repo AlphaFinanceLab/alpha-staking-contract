@@ -34,6 +34,11 @@ def proxy_admin(a, deployer, ProxyAdminImpl):
 
 
 @pytest.fixture(scope="function")
+def merkle(deployer, alpha, staking, MockMerkleStaking):
+    return MockMerkleStaking.deploy(alpha, staking, "", {"from": deployer})
+
+
+@pytest.fixture(scope="function")
 def staking(
     a,
     alpha,
@@ -75,9 +80,31 @@ def staking_v2(deployer, AlphaStakingV2):
 
 
 @pytest.fixture(scope="function")
-def upgraded_staking(deployer, staking, proxy_admin, AlphaStakingV2):
+def staking_v3(deployer, AlphaStakingV3):
+    staking_impl_v3 = AlphaStakingV3.deploy({"from": deployer})
+    return staking_impl_v3
+
+
+@pytest.fixture(scope="function")
+def upgraded_staking_v2(deployer, staking, proxy_admin, AlphaStakingV2):
     staking_impl_v2 = AlphaStakingV2.deploy({"from": deployer})
     proxy_admin.upgrade(staking, staking_impl_v2)
+    return staking
+
+
+@pytest.fixture(scope="function")
+def upgraded_staking_v3(
+    deployer, alpha, merkle, upgraded_staking_v2, proxy_admin, AlphaStakingV3
+):
+    staking = upgraded_staking_v2
+    staking_impl_v3 = AlphaStakingV3.deploy({"from": deployer})
+    proxy_admin.upgrade(staking, staking_impl_v3)
+    staking.setMerkle(merkle, {"from": deployer})
+
+    # setup merkle
+    alpha.mint(merkle, 1000 * 10 ** 18, {"from": deployer})
+    alpha.approve(staking, 2 ** 256 - 1, {"from": merkle})
+    merkle.updateStaking(staking, {"from": deployer})
     return staking
 
 

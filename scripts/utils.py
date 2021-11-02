@@ -1,3 +1,4 @@
+from web3 import Web3
 from brownie import accounts, Contract, chain
 from brownie import AlphaStaking, ProxyAdminImpl, TransparentUpgradeableProxyImpl
 
@@ -63,3 +64,41 @@ def setup():
     alpha.approve(staking, 2 ** 256 - 1, {"from": worker})
 
     return deployer, alice, bob, worker, alpha, proxy_admin, staking_impl, staking
+
+
+def generate_merkle(accounts, rewards):
+    if len(accounts) != len(rewards):
+        raise Exception("length is not equal")
+    leaves = [
+        Web3.solidityKeccak(["address", "uint256"], [account, reward])
+        for account, reward in zip(accounts, rewards)
+    ]
+    hashes = leaves
+    proofs = []
+    for _ in accounts:
+        proofs.append([])
+
+    _round = 0
+    while len(hashes) > 1:
+        _res = []
+        for i in range(0, len(hashes), 2):
+            if i == len(hashes) - 1:
+                _res.append(hashes[i])
+                continue
+
+            node1 = hashes[i]
+            node2 = hashes[i + 1]
+            if node1 > node2:
+                node1, node2 = node2, node1
+            _res.append(Web3.solidityKeccak(["bytes32", "bytes32"], [node1, node2]))
+
+            for j in range(1 << _round):
+                proofs[i * (1 << _round) + j].append(hashes[i + 1])
+                if (i + 1) * (1 << _round) + j < len(leaves):
+                    proofs[(i + 1) * (1 << _round) + j].append(hashes[i])
+
+        hashes = _res
+        _round += 1
+
+    root = hashes[0]
+    return root, proofs

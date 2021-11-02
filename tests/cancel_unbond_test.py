@@ -334,7 +334,7 @@ def test_stake_after_new_withdraw_period_expired(
     assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
     assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
 
-    # wait 30 days
+    # wait 40 days
     chain.sleep(40 * 86400)
 
     # re-stake
@@ -364,11 +364,467 @@ def test_withdraw_period_expired_then_upgrade_and_stake(
     assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
     assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
 
-    # wait 7 days
+    # wait 10 days
     chain.sleep(10 * 86400)
 
     # upgrade staking
     proxy_admin.upgrade(staking, staking_v2)
+
+    # re-stake
+    staking.stake(10 ** 18, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 0, "incorrect alice status after re-stake"
+    assert cur_unbondtime == 0, "incorrect unbond time after re-stake"
+    assert cur_unbondshare == 0, "incorrect unbond share after re-stake"
+
+
+# ------------------------------------------- Alpha staking v3 --------------------------------------
+def test_unbond_then_stake_staking_v3(
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+
+    (
+        prev_status,
+        prev_share,
+        prev_unbondtime,
+        prev_unbondshare,
+    ) = upgraded_staking_v3.users(alice)
+    assert prev_status == 0, "incorrect alice status before unbond"
+    assert prev_unbondtime == 0, "incorrect unbond time before unbond"
+    assert prev_unbondshare == 0, "incorrect unbond share before unbond"
+
+    tx = upgraded_staking_v3.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    upgraded_staking_v3.stake(10 ** 18, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 0, "incorrect alice status after re-stake"
+    assert cur_unbondtime == 0, "incorrect unbond time after re-stake"
+    assert cur_unbondshare == 0, "incorrect unbond share after re-stake"
+
+
+def test_unbond_twice_staking_v3(
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+
+    (
+        prev_status,
+        prev_share,
+        prev_unbondtime,
+        prev_unbondshare,
+    ) = upgraded_staking_v3.users(alice)
+    tx = upgraded_staking_v3.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    chain.sleep(1 * 86400)
+
+    tx = upgraded_staking_v3.unbond(prev_share // 4, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 1, "incorrect alice status after re-unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after re-unbond"
+    assert cur_unbondshare == prev_share // 4, "incorrect unbond share after re-unbond"
+
+
+def test_stake_after_withdraw_period_staking_v3(
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+
+    (
+        prev_status,
+        prev_share,
+        prev_unbondtime,
+        prev_unbondshare,
+    ) = upgraded_staking_v3.users(alice)
+    tx = upgraded_staking_v3.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    # wait 30 days
+    chain.sleep(30 * 86400)
+
+    # re-stake
+    upgraded_staking_v3.stake(10 ** 18, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 0, "incorrect alice status after re-stake"
+    assert cur_unbondtime == 0, "incorrect unbond time after re-stake"
+    assert cur_unbondshare == 0, "incorrect unbond share after re-stake"
+
+
+def test_unbond_after_withdraw_period_staking_v3(
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+
+    (
+        prev_status,
+        prev_share,
+        prev_unbondtime,
+        prev_unbondshare,
+    ) = upgraded_staking_v3.users(alice)
+    tx = upgraded_staking_v3.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    # wait 30 days
+    chain.sleep(30 * 86400)
+
+    # re-stake
+    tx = upgraded_staking_v3.unbond(prev_share // 4, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 1, "incorrect alice status after re-unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after re-unbond"
+    assert cur_unbondshare == prev_share // 4, "incorrect unbond share after re-unbond"
+
+
+def test_stake_after_withdraw_period_expired_staking_v3(
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+
+    (
+        prev_status,
+        prev_share,
+        prev_unbondtime,
+        prev_unbondshare,
+    ) = upgraded_staking_v3.users(alice)
+    tx = upgraded_staking_v3.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    # wait 40 days
+    chain.sleep(40 * 86400)
+
+    # re-stake
+    upgraded_staking_v3.stake(10 ** 18, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 0, "incorrect alice status after re-stake"
+    assert cur_unbondtime == 0, "incorrect unbond time after re-stake"
+    assert cur_unbondshare == 0, "incorrect unbond share after re-stake"
+
+
+def test_unbond_after_withdraw_period_expired_staking_v3(
+    a, deployer, alice, bob, worker, alpha, upgraded_staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+
+    (
+        prev_status,
+        prev_share,
+        prev_unbondtime,
+        prev_unbondshare,
+    ) = upgraded_staking_v3.users(alice)
+    tx = upgraded_staking_v3.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    # wait 40 days
+    chain.sleep(40 * 86400)
+
+    tx = upgraded_staking_v3.unbond(prev_share // 4, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = upgraded_staking_v3.users(
+        alice
+    )
+    assert cur_status == 1, "incorrect alice status after re-unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after re-unbond"
+    assert cur_unbondshare == prev_share // 4, "incorrect unbond share after re-unbond"
+
+
+def test_unbond_then_upgrade_and_stake_staking_v3(
+    alice, bob, proxy_admin, upgraded_staking_v2, staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    staking = upgraded_staking_v2
+
+    staking.stake(alice_stake_amt, {"from": alice})
+    staking.stake(bob_stake_amt, {"from": bob})
+
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
+    assert prev_status == 0, "incorrect alice status before unbond"
+    assert prev_unbondtime == 0, "incorrect unbond time before unbond"
+    assert prev_unbondshare == 0, "incorrect unbond share before unbond"
+
+    tx = staking.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    # upgrade
+    proxy_admin.upgrade(staking, staking_v3)
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    staking.stake(10 ** 18, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 0, "incorrect alice status after re-stake"
+    assert cur_unbondtime == 0, "incorrect unbond time after re-stake"
+    assert cur_unbondshare == 0, "incorrect unbond share after re-stake"
+
+
+def test_unbond_twice_across_upgrade_period_staking_v3(
+    alice, bob, proxy_admin, upgraded_staking_v2, staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    staking = upgraded_staking_v2
+
+    staking.stake(alice_stake_amt, {"from": alice})
+    staking.stake(bob_stake_amt, {"from": bob})
+
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
+    tx = staking.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    chain.sleep(1 * 86400)
+
+    tx = staking.unbond(prev_share // 4, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 1, "incorrect alice status after re-unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after re-unbond"
+    assert cur_unbondshare == prev_share // 4, "incorrect unbond share after re-unbond"
+
+    # upgrade staking
+    proxy_admin.upgrade(staking, staking_v3)
+
+    chain.sleep(1 * 86400)
+
+    tx = staking.unbond(prev_share // 5, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 5, "incorrect unbond share after unbond"
+
+    chain.sleep(1 * 86400)
+
+    tx = staking.unbond(prev_share // 7, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 1, "incorrect alice status after re-unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after re-unbond"
+    assert cur_unbondshare == prev_share // 7, "incorrect unbond share after re-unbond"
+
+
+def test_stake_after_new_withdraw_period_staking_v3(
+    alice, bob, proxy_admin, upgraded_staking_v2, staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    staking = upgraded_staking_v2
+
+    staking.stake(alice_stake_amt, {"from": alice})
+    staking.stake(bob_stake_amt, {"from": bob})
+
+    # upgrade staking
+    proxy_admin.upgrade(staking, staking_v3)
+
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
+
+    tx = staking.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    # wait 30 days
+    chain.sleep(30 * 86400)
+
+    # re-stake
+    staking.stake(10 ** 18, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 0, "incorrect alice status after re-stake"
+    assert cur_unbondtime == 0, "incorrect unbond time after re-stake"
+    assert cur_unbondshare == 0, "incorrect unbond share after re-stake"
+
+
+def test_upgrade_and_stake_after_withdraw_period_staking_v3(
+    alice, bob, proxy_admin, upgraded_staking_v2, staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    staking = upgraded_staking_v2
+
+    staking.stake(alice_stake_amt, {"from": alice})
+    staking.stake(bob_stake_amt, {"from": bob})
+
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
+
+    tx = staking.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    # wait 7 days
+    chain.sleep(7 * 86400)
+
+    # upgrade staking
+    proxy_admin.upgrade(upgraded_staking_v2, staking_v3)
+
+    # re-stake
+    staking.stake(10 ** 18, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 0, "incorrect alice status after re-stake"
+    assert cur_unbondtime == 0, "incorrect unbond time after re-stake"
+    assert cur_unbondshare == 0, "incorrect unbond share after re-stake"
+
+
+def test_stake_after_new_withdraw_period_expired_staking_v3(
+    alice, bob, proxy_admin, upgraded_staking_v2, staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    staking = upgraded_staking_v2
+
+    staking.stake(alice_stake_amt, {"from": alice})
+    staking.stake(bob_stake_amt, {"from": bob})
+
+    # upgrade staking
+    proxy_admin.upgrade(staking, staking_v3)
+
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
+
+    tx = staking.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    # wait 40 days
+    chain.sleep(40 * 86400)
+
+    # re-stake
+    staking.stake(10 ** 18, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 0, "incorrect alice status after re-stake"
+    assert cur_unbondtime == 0, "incorrect unbond time after re-stake"
+    assert cur_unbondshare == 0, "incorrect unbond share after re-stake"
+
+
+def test_withdraw_period_expired_then_upgrade_and_stake_staking_v3(
+    alice, bob, proxy_admin, upgraded_staking_v2, staking_v3
+):
+    alice_stake_amt = 10 ** 18
+    bob_stake_amt = 3 * 10 ** 18
+
+    staking = upgraded_staking_v2
+
+    staking.stake(alice_stake_amt, {"from": alice})
+    staking.stake(bob_stake_amt, {"from": bob})
+
+    prev_status, prev_share, prev_unbondtime, prev_unbondshare = staking.users(alice)
+
+    tx = staking.unbond(prev_share // 3, {"from": alice})
+
+    cur_status, cur_share, cur_unbondtime, cur_unbondshare = staking.users(alice)
+    assert cur_status == 1, "incorrect alice status after unbond"
+    assert cur_unbondtime == tx.timestamp, "incorrect unbond time after unbond"
+    assert cur_unbondshare == prev_share // 3, "incorrect unbond share after unbond"
+
+    # wait 40 days
+    chain.sleep(40 * 86400)
+
+    # upgrade staking
+    proxy_admin.upgrade(staking, staking_v3)
 
     # re-stake
     staking.stake(10 ** 18, {"from": alice})
