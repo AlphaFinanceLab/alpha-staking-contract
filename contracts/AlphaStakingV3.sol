@@ -12,7 +12,6 @@ contract AlphaStakingV3 is Initializable, ReentrancyGuard {
 
   event SetWorker(address worker);
   event Stake(address owner, uint share, uint amount);
-  event StakeFor(address staker, address owner);
   event Unbond(address owner, uint unbondTime, uint unbondShare);
   event Withdraw(address owner, uint withdrawShare, uint withdrawAmount);
   event CancelUnbond(address owner, uint unbondTime, uint unbondShare);
@@ -51,11 +50,6 @@ contract AlphaStakingV3 is Initializable, ReentrancyGuard {
     _;
   }
 
-  modifier onlyMerkle() {
-    require(msg.sender == merkle, 'onlyMerkle/not-merkle');
-    _;
-  }
-
   function initialize(IERC20 _alpha, address _governor) external initializer {
     alpha = _alpha;
     governor = _governor;
@@ -81,42 +75,39 @@ contract AlphaStakingV3 is Initializable, ReentrancyGuard {
     governor = msg.sender;
   }
 
-  function getStakeValue(address _user) external view returns (uint) {
-    uint share = users[_user].share;
+  function getStakeValue(address user) external view returns (uint) {
+    uint share = users[user].share;
     return share == 0 ? 0 : share.mul(totalAlpha).div(totalShare);
   }
 
-  function stake(uint _amount) external nonReentrant {
-    _stake(msg.sender, _amount);
-  }
-
-  function _stake(address _owner, uint _amount) internal {
-    require(_amount >= 1e18, 'stake/amount-too-small');
-    Data storage data = users[_owner];
+  function stake(address owner, uint amount) external nonReentrant {
+    require(msg.sender == owner || msg.sender == merkle, 'stake/caller-not-owner-or-merkle');
+    require(amount >= 1e18, 'stake/amount-too-small');
+    Data storage data = users[owner];
     if (data.status != STATUS_READY) {
-      emit CancelUnbond(_owner, data.unbondTime, data.unbondShare);
+      emit CancelUnbond(owner, data.unbondTime, data.unbondShare);
       data.status = STATUS_READY;
       data.unbondTime = 0;
       data.unbondShare = 0;
     }
-    alpha.safeTransferFrom(msg.sender, address(this), _amount);
-    uint share = totalAlpha == 0 ? _amount : _amount.mul(totalShare).div(totalAlpha);
-    totalAlpha = totalAlpha.add(_amount);
+    alpha.safeTransferFrom(owner, address(this), amount);
+    uint share = totalAlpha == 0 ? amount : amount.mul(totalShare).div(totalAlpha);
+    totalAlpha = totalAlpha.add(amount);
     totalShare = totalShare.add(share);
     data.share = data.share.add(share);
-    emit Stake(_owner, share, _amount);
+    emit Stake(owner, share, amount);
   }
 
-  function unbond(uint _share) external nonReentrant {
+  function unbond(uint share) external nonReentrant {
     Data storage data = users[msg.sender];
     if (data.status != STATUS_READY) {
       emit CancelUnbond(msg.sender, data.unbondTime, data.unbondShare);
     }
-    require(_share <= data.share, 'unbond/insufficient-share');
+    require(share <= data.share, 'unbond/insufficient-share');
     data.status = STATUS_UNBONDING;
     data.unbondTime = block.timestamp;
-    data.unbondShare = _share;
-    emit Unbond(msg.sender, block.timestamp, _share);
+    data.unbondShare = share;
+    emit Unbond(msg.sender, block.timestamp, share);
   }
 
   function withdraw() external nonReentrant {
@@ -140,31 +131,22 @@ contract AlphaStakingV3 is Initializable, ReentrancyGuard {
     require(totalAlpha >= 1e18, 'withdraw/too-low-total-alpha');
   }
 
-  function reward(uint _amount) external onlyWorker {
+  function reward(uint amount) external onlyWorker {
     require(totalShare >= 1e18, 'reward/share-too-small');
-    alpha.safeTransferFrom(msg.sender, address(this), _amount);
-    totalAlpha = totalAlpha.add(_amount);
-    emit Reward(msg.sender, _amount);
+    alpha.safeTransferFrom(msg.sender, address(this), amount);
+    totalAlpha = totalAlpha.add(amount);
+    emit Reward(msg.sender, amount);
   }
 
-  function skim(uint _amount) external onlyGov {
-    alpha.safeTransfer(msg.sender, _amount);
+  function skim(uint amount) external onlyGov {
+    alpha.safeTransfer(msg.sender, amount);
     require(alpha.balanceOf(address(this)) >= totalAlpha, 'skim/not-enough-balance');
   }
 
-  function extract(uint _amount) external onlyGov {
-    totalAlpha = totalAlpha.sub(_amount);
-    alpha.safeTransfer(msg.sender, _amount);
+  function extract(uint amount) external onlyGov {
+    totalAlpha = totalAlpha.sub(amount);
+    alpha.safeTransfer(msg.sender, amount);
     require(totalAlpha >= 1e18, 'extract/too-low-total-alpha');
-    emit Extract(msg.sender, _amount);
-  }
-
-  function stakeFor(address _owner, uint _amount)
-    external
-    onlyMerkle
-    nonReentrant
-  {
-    _stake(_owner, _amount);
-    emit StakeFor(msg.sender, _owner);
+    emit Extract(msg.sender, amount);
   }
 }
