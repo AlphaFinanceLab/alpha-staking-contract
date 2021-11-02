@@ -44,6 +44,4 @@ interface IAlphaStaking {
   function totalAlpha() external view returns (uint);
 
   function totalShare() external view returns (uint);
-
-  function stakeFor(address owner, uint amount) external;
 }
