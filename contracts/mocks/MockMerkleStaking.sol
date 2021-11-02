@@ -60,7 +60,7 @@ contract MockMerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
 
     require(claimAmount > 0, "claim-and-stake: account don't have reward to claim");
     IERC20(token).approve(address(staking), claimAmount);
-    staking.stakeFor(msg.sender, claimAmount);
+    staking.stake(msg.sender, claimAmount);
     claimed[msg.sender] = _reward;
     emit ClaimAndStake(msg.sender, claimAmount);
   }

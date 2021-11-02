@@ -129,8 +129,8 @@ def test_unbond_reward_staking_v3(
     bob_stake_amt = 3 * 10 ** 18
 
     # setup stake
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     ####################################################################################
     print("===============================================")

@@ -12,6 +12,8 @@ interface IAny {
 
     function setWorker(address) external;
 
+    function stake(uint) external;
+
     function stake(address, uint) external;
 
     function mint(address, uint) external;

@@ -94,7 +94,7 @@ def test_reward_after_upgrade_staking_v3(a, deployer, alice, bob, upgraded_staki
     with brownie.reverts("reward/share-too-small"):
         upgraded_staking_v3.reward(0, {"from": bob})
 
-    upgraded_staking_v3.stake(10 ** 18, {"from": alice})
+    upgraded_staking_v3.stake(alice, 10 ** 18, {"from": alice})
 
     with brownie.reverts("onlyWorker/not-worker"):
         upgraded_staking_v3.reward(0, {"from": alice})
