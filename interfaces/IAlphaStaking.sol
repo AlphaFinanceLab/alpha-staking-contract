@@ -44,4 +44,6 @@ interface IAlphaStaking {
   function totalAlpha() external view returns (uint);
 
   function totalShare() external view returns (uint);
+
+  function merkle() external view returns (address);
 }
