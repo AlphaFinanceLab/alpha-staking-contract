@@ -88,7 +88,7 @@ def test_single_stake_after_upgrade_staking_v3(
     stake_amt = 10 ** 18
     reward_amt = 10 ** 16
 
-    upgraded_staking_v3.stake(stake_amt, {"from": alice})  # stake 1 ALPHA
+    upgraded_staking_v3.stake(alice, stake_amt, {"from": alice})  # stake 1 ALPHA
     upgraded_staking_v3.reward(reward_amt, {"from": worker})  # reward 0.01 ALPHA
 
     assert upgraded_staking_v3.totalShare() == stake_amt, "incorrect share"
@@ -109,11 +109,11 @@ def test_many_stake_after_upgrade_staking_v3(
     stake_amt = 10 ** 18
     reward_amt = 10 ** 16
 
-    upgraded_staking_v3.stake(stake_amt, {"from": alice})  # stake 1 ALPHA
+    upgraded_staking_v3.stake(alice, stake_amt, {"from": alice})  # stake 1 ALPHA
     upgraded_staking_v3.reward(reward_amt, {"from": worker})  # reward 0.01 ALPHA
 
     bob_stake_amt = 2 * 10 ** 18
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})  # stake 2 ALPHA
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})  # stake 2 ALPHA
 
     assert upgraded_staking_v3.totalAlpha() == 301 * 10 ** 16, "incorrect total alpha"
     assert (
@@ -152,13 +152,13 @@ def test_stake_for_staking_v3(
     stake_amt = 10 ** 18
     reward_amt = 10 ** 16
 
-    upgraded_staking_v3.stakeFor(
+    upgraded_staking_v3.stake(
         alice, stake_amt, {"from": merkle}
     )  # merkle stakes 1 ALPHA for alice
     upgraded_staking_v3.reward(reward_amt, {"from": worker})  # reward 0.01 ALPHA
 
     bob_stake_amt = 2 * 10 ** 18
-    upgraded_staking_v3.stakeFor(
+    upgraded_staking_v3.stake(
         bob, bob_stake_amt, {"from": merkle}
     )  # merkle stakes 2 ALPHA for alice
 
@@ -199,13 +199,13 @@ def test_stake_for_with_normal_stake_staking_v3(
     stake_amt = 10 ** 18
     reward_amt = 10 ** 16
 
-    upgraded_staking_v3.stakeFor(
+    upgraded_staking_v3.stake(
         alice, stake_amt, {"from": merkle}
     )  # merkle stakes 1 ALPHA for alice
     upgraded_staking_v3.reward(reward_amt, {"from": worker})  # reward 0.01 ALPHA
 
     bob_stake_amt = 2 * 10 ** 18
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})  # bob stakes 2 ALPHA
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})  # bob stakes 2 ALPHA
 
     assert upgraded_staking_v3.totalAlpha() == 301 * 10 ** 16, "incorrect total alpha"
     assert (
@@ -238,7 +238,7 @@ def test_stake_for_with_normal_stake_staking_v3(
     ), "incorrect bob alice"
 
 
-def test_stake_for_by_other_user_staking_v3(alice, upgraded_staking_v3):
+def test_stake_for_by_other_user_staking_v3(alice, bob, upgraded_staking_v3):
     stake_amt = 10 ** 18
-    with brownie.reverts("onlyMerkle/not-merkle"):
-        upgraded_staking_v3.stakeFor(alice, stake_amt, {"from": alice})
+    with brownie.reverts("stake/caller-not-owner-or-merkle"):
+        upgraded_staking_v3.stake(alice, stake_amt, {"from": bob})

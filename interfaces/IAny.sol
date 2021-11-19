@@ -14,6 +14,8 @@ interface IAny {
 
     function stake(uint) external;
 
+    function stake(address, uint) external;
+
     function mint(address, uint) external;
 
     function mint(uint) external;
@@ -61,6 +63,4 @@ interface IAny {
     function getProxyImplementation(address) external view returns (address);
 
     function setMerkle(address) external;
-
-    function stakeFor(address owner, uint amount) external;
 }

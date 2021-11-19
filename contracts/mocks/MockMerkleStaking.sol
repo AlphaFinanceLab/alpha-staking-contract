@@ -15,7 +15,7 @@ contract MockMerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
   using SafeMath for uint;
 
   bytes32 public root;
-  address public immutable token;
+  IERC20 public immutable token;
   mapping(address => uint) public override claimed;
   IAlphaStaking public staking;
 
@@ -30,7 +30,7 @@ contract MockMerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
     address _staking,
     bytes32 _root
   ) public {
-    token = _token;
+    token = IERC20(_token);
     _updateMerkleRoot(_root);
     _updateStaking(_staking);
   }
@@ -44,12 +44,15 @@ contract MockMerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
   }
 
   function deposit(uint _amount) external override onlyOwner {
-    IERC20(token).safeTransferFrom(msg.sender, address(this), _amount);
+    token.safeTransferFrom(msg.sender, address(this), _amount);
     emit Deposit(_amount);
   }
 
   function withdraw(uint _amount) external override onlyOwner {
-    IERC20(token).safeTransfer(msg.sender, _amount);
+    if (_amount == 0) {
+      _amount = token.balanceOf(address(this));
+    }
+    token.safeTransfer(msg.sender, _amount);
     emit Withdraw(_amount);
   }
 
@@ -57,16 +60,19 @@ contract MockMerkleStaking is IMerkleStaking, Ownable, ReentrancyGuard {
     bytes32 leaf = keccak256(abi.encodePacked(msg.sender, _reward));
     require(MerkleProof.verify(_proof, root, leaf), 'claim-and-stake: invalid proof');
     uint claimAmount = _reward.sub(claimed[msg.sender]);
-
     require(claimAmount > 0, "claim-and-stake: account don't have reward to claim");
-    IERC20(token).approve(address(staking), claimAmount);
-    staking.stakeFor(msg.sender, claimAmount);
+
     claimed[msg.sender] = _reward;
+    token.safeTransfer(msg.sender, claimAmount);
+    staking.stake(msg.sender, claimAmount);
     emit ClaimAndStake(msg.sender, claimAmount);
   }
 
   // @dev withdraw tokens in unexpected scenarios. Emergency use only!
   function extract(address _token, uint _amount) external onlyOwner {
+    if (_amount == 0) {
+      _amount = IERC20(_token).balanceOf(address(this));
+    }
     IERC20(_token).safeTransfer(msg.sender, _amount);
   }
 

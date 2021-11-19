@@ -248,8 +248,8 @@ def test_unbond_withdraw_after_uprade_staking_v3(
     bob_stake_amt = 3 * 10 ** 18
 
     # setup stake
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     (
         prev_status,
@@ -298,8 +298,8 @@ def test_unbond_more_than_share_staking_v3(
     bob_stake_amt = 3 * 10 ** 18
 
     # setup stake
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     (
         prev_status,
@@ -337,8 +337,8 @@ def test_withdraw_before_time_staking_v3(
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     (
         prev_status,
@@ -365,8 +365,8 @@ def test_withdraw_after_expire_staking_v3(
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     (
         prev_status,

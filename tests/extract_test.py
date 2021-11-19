@@ -432,7 +432,7 @@ def test_worker_extract_after_upgrade_staking_v3(a, alice, worker, upgraded_stak
 
 def test_not_enough_alpha_staking_v3(a, alice, bob, deployer, upgraded_staking_v3):
     alice_stake_amt = 10 ** 18
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
     with brownie.reverts("extract/too-low-total-alpha"):
         upgraded_staking_v3.extract(10 ** 18, {"from": deployer})
 
@@ -452,7 +452,7 @@ def test_not_enough_alpha_after_upgrade_staking_v3(
     a, alice, bob, deployer, upgraded_staking_v3
 ):
     alice_stake_amt = 10 ** 18
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
     with brownie.reverts("extract/too-low-total-alpha"):
         upgraded_staking_v3.extract(10 ** 18, {"from": deployer})
 
@@ -463,8 +463,8 @@ def test_extract_staking_v3(
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     prevDeployerBal = alpha.balanceOf(deployer)
 
@@ -501,8 +501,8 @@ def test_extract_after_upgrade_staking_v3(
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     prevDeployerBal = alpha.balanceOf(deployer)
 
@@ -519,8 +519,8 @@ def test_extract_during_unbond_staking_v3(
     alice_stake_amt = 200 * 10 ** 18
     bob_stake_amt = 200 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     upgraded_staking_v3.unbond(alice_stake_amt / 2, {"from": alice})
 
@@ -627,8 +627,8 @@ def test_extract_during_unbond_after_upgrade_staking_v3(
     alice_stake_amt = 200 * 10 ** 18
     bob_stake_amt = 200 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     upgraded_staking_v3.unbond(alice_stake_amt / 2, {"from": alice})
 
@@ -678,10 +678,10 @@ def test_staking_after_extract_staking_v3(
     alice_stake_amt = 200 * 10 ** 18
     bob_stake_amt = 200 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
 
     upgraded_staking_v3.extract(100 * 10 ** 18, {"from": deployer})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     upgraded_staking_v3.unbond(alice_stake_amt, {"from": alice})
     upgraded_staking_v3.unbond(bob_stake_amt * 2 * 99 // 100, {"from": bob})
@@ -754,10 +754,10 @@ def test_staking_after_extract_and_upgrade_staking_v3(
     alice_stake_amt = 200 * 10 ** 18
     bob_stake_amt = 200 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
 
     upgraded_staking_v3.extract(100 * 10 ** 18, {"from": deployer})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     upgraded_staking_v3.unbond(alice_stake_amt, {"from": alice})
     upgraded_staking_v3.unbond(bob_stake_amt * 2 * 99 // 100, {"from": bob})
@@ -787,7 +787,7 @@ def test_withdraw_all_staking_v3(
 
     alice_stake_amt = 200 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
 
     upgraded_staking_v3.unbond(alice_stake_amt, {"from": alice})
 
@@ -827,7 +827,7 @@ def test_withdraw_all_after_upgrade_staking_v3(
 
     alice_stake_amt = 200 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
 
     upgraded_staking_v3.unbond(alice_stake_amt, {"from": alice})
 

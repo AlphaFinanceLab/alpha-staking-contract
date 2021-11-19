@@ -140,8 +140,8 @@ def test_not_enough_alpha_staking_v3(upgraded_staking_v3, deployer, alpha, alice
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     assert alpha.balanceOf(upgraded_staking_v3) > 0, "invalid alpha after stake"
 
@@ -185,8 +185,8 @@ def test_not_enough_alpha_after_upgrade_staking_v3(
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     assert alpha.balanceOf(upgraded_staking_v3) > 0, "invalid alpha after stake"
 
@@ -203,8 +203,8 @@ def test_skim_staking_v3(a, deployer, alice, bob, worker, alpha, upgraded_stakin
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     alpha.transfer(upgraded_staking_v3, 1000, {"from": alice})
     prevDeployerBal = alpha.balanceOf(deployer)
@@ -241,8 +241,8 @@ def test_skim_after_upgrade_staking_v3(
     alice_stake_amt = 10 ** 18
     bob_stake_amt = 3 * 10 ** 18
 
-    upgraded_staking_v3.stake(alice_stake_amt, {"from": alice})
-    upgraded_staking_v3.stake(bob_stake_amt, {"from": bob})
+    upgraded_staking_v3.stake(alice, alice_stake_amt, {"from": alice})
+    upgraded_staking_v3.stake(bob, bob_stake_amt, {"from": bob})
 
     alpha.transfer(upgraded_staking_v3, 1000, {"from": alice})
     prevDeployerBal = alpha.balanceOf(deployer)

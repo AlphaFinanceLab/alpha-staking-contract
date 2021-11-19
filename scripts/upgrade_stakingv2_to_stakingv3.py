@@ -94,7 +94,7 @@ def test_upgrade(alpha, staking, staking_impl_v3, proxy_admin, deployer):
     charlie = accounts.at("0x326d9f47ba49bbaac279172634827483af70a601", force=True)
     charlie_stake_amount = 100 * 10 ** 18
     alpha.approve(staking, charlie_stake_amount, {"from": charlie, "gas_price": 0})
-    staking.stake(charlie_stake_amount, {"from": charlie, "gas_price": 0})
+    staking.stake(charlie, charlie_stake_amount, {"from": charlie, "gas_price": 0})
 
     (
         charlie_after_status,
@@ -215,6 +215,7 @@ def test_upgrade(alpha, staking, staking_impl_v3, proxy_admin, deployer):
     alpha.transfer(merkle, sum(rewards.values()), {"from": deployer})
 
     # try to claim eve reward by bob, this should be revert
+    alpha.approve(staking, rewards[eve.address], {"from": bob, "gas_price": 0})
     try:
         merkle.claimAndStake(
             rewards[eve.address], proof[1], {"from": bob, "gas_price": 0}
@@ -223,6 +224,7 @@ def test_upgrade(alpha, staking, staking_impl_v3, proxy_admin, deployer):
     except VirtualMachineError:
         pass
 
+    alpha.approve(staking, rewards[eve.address], {"from": eve, "gas_price": 0})
     merkle.claimAndStake(rewards[eve.address], proof[1], {"from": eve, "gas_price": 0})
 
     total_alpha_v3 = staking.totalAlpha()
@@ -252,6 +254,8 @@ def main():
     # deployer = accounts.load('gh')
 
     alpha = interface.IAny("0xa1faa113cbE53436Df28FF0aEe54275c13B40975")
+    # TODO: Update merkle address before deploy
+    merkle = ""
 
     proxy_admin = ProxyAdminImpl.at("0x090eCE252cEc5998Db765073D07fac77b8e60CB2")
     staking_impl_v3 = AlphaStakingV3.deploy({"from": deployer})
@@ -263,3 +267,5 @@ def main():
 
     # upgrade
     proxy_admin.upgrade(staking, staking_impl_v3, {"from": deployer})
+
+    staking.setMerkle(merkle, {"from": deployer})

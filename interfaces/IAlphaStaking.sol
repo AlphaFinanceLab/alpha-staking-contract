@@ -19,7 +19,7 @@ interface IAlphaStaking {
 
   function getStakeValue(address) external view returns (uint);
 
-  function stake(uint) external;
+  function stake(address, uint) external;
 
   function unbond(uint) external;
 
@@ -45,5 +45,5 @@ interface IAlphaStaking {
 
   function totalShare() external view returns (uint);
 
-  function stakeFor(address owner, uint amount) external;
+  function merkle() external view returns (address);
 }
