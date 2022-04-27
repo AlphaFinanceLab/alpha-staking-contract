@@ -8,6 +8,9 @@ try:
 except:
     pass
 
+SAFE_ETH_EXEC_ADDR = "0x5f5E537E5b2efc2334fEA4e584790cA7a9001295"
+SAFE_ETH_DEV_ADDR = "0xe142BAe2338D2c691C267B054b13d38Ce6aC5442"
+
 ALPHA = "0xa1faa113cbE53436Df28FF0aEe54275c13B40975"
 
 
@@ -129,8 +132,8 @@ def yes_no_question(message="?", default=False) -> bool:
 
 class AlphaMainnetContracts:
     def __init__(self):
-        self.dev_safe = ApeSafe("0x6be987c6d72e25F02f6f061F94417d83a6Aa13fC")  # FIXME:
-        self.exec_safe = ApeSafe("0x914C687FFdAB6E1B47a327E7E4C10e4a058e009d")  # FIXME:
+        self.dev_safe = ApeSafe(SAFE_ETH_DEV_ADDR)
+        self.exec_safe = ApeSafe(SAFE_ETH_EXEC_ADDR)
 
     def add(self, name, address):
         setattr(self, name, address)

@@ -1,7 +1,10 @@
-from brownie import interface, accounts, ZERO_ADDRESS
-from brownie.exceptions import VirtualMachineError
+from brownie import interface, accounts, rpc, network
 
 from scripts.utils import *
+
+if not rpc.is_active():
+    network.priority_fee("1 gwei")
+    network.max_fee("100 gwei")
 
 
 def main():

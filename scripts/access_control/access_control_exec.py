@@ -8,7 +8,6 @@ from scripts.utils import *
 
 def main():
     assert rpc.is_active(), "only fork rpc"
-    is_submit = yes_no_question("do we submit tx to safe wallet?", default=False)
 
     alpha_contracts = get_alpha_contracts()
 
@@ -23,6 +22,7 @@ def main():
     final_receipts.append(receipt)
 
     # if submit safe transaction, skip running tests
+    is_submit = yes_no_question("do we submit tx to safe wallet?", default=False)
     if is_submit:
         for i in range(0, len(final_receipts), 10):
             safe_tx = exec_safe.multisend_from_receipts(
@@ -40,7 +40,7 @@ def main():
         assert False, "should revert"
     except VirtualMachineError as e:
         assert e.revert_msg == "onlyGov/not-governor"
-        print(e)
+        print("expect revert")
 
     alpha_staking.setPendingGovernor(eoa_account, {"from": exec_account})
     try:
@@ -48,7 +48,7 @@ def main():
         assert False, "should revert"
     except VirtualMachineError as e:
         assert e.revert_msg == "onlyGov/not-governor"
-        print(e)
+        print("expect revert")
 
     alpha_staking.setMerkle(ZERO_ADDRESS, {"from": exec_account})
     try:
@@ -56,6 +56,6 @@ def main():
         assert False, "should revert"
     except VirtualMachineError as e:
         assert e.revert_msg == "onlyGov/not-governor"
-        print(e)
+        print("expect revert")
 
     print("Done!")
