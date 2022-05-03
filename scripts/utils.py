@@ -1,11 +1,15 @@
 from web3 import Web3
 from brownie import accounts, Contract, chain
 from brownie import AlphaStaking, ProxyAdminImpl, TransparentUpgradeableProxyImpl
+from ape_safe import ApeSafe
 
 try:
     from brownie import interface
 except:
     pass
+
+SAFE_ETH_EXEC_ADDR = "0x5f5E537E5b2efc2334fEA4e584790cA7a9001295"
+SAFE_ETH_DEV_ADDR = "0xe142BAe2338D2c691C267B054b13d38Ce6aC5442"
 
 ALPHA = "0xa1faa113cbE53436Df28FF0aEe54275c13B40975"
 
@@ -21,7 +25,7 @@ def mint_tokens(token, to, interface=None, amount=None):
     token = interface.IAny(token)
     if amount is None:
         # default is 1M tokens
-        amount = 10 ** 12 * 10 ** token.decimals()
+        amount = 10**12 * 10 ** token.decimals()
 
     if token == ALPHA:
         owner = token.owner()
@@ -58,10 +62,10 @@ def setup():
     mint_tokens(alpha, worker)
 
     # approve
-    alpha.approve(staking, 2 ** 256 - 1, {"from": alice})
-    alpha.approve(staking, 2 ** 256 - 1, {"from": bob})
-    alpha.approve(staking, 2 ** 256 - 1, {"from": deployer})
-    alpha.approve(staking, 2 ** 256 - 1, {"from": worker})
+    alpha.approve(staking, 2**256 - 1, {"from": alice})
+    alpha.approve(staking, 2**256 - 1, {"from": bob})
+    alpha.approve(staking, 2**256 - 1, {"from": deployer})
+    alpha.approve(staking, 2**256 - 1, {"from": worker})
 
     return deployer, alice, bob, worker, alpha, proxy_admin, staking_impl, staking
 
@@ -102,3 +106,38 @@ def generate_merkle(accounts, rewards):
 
     root = hashes[0]
     return root, proofs
+
+
+def yes_no_question(message="?", default=False) -> bool:
+    """Ask user about yes/no question.
+
+    Argument
+    ---------
+        message: promt message for showing a question to user.
+        default: default answer if user just enter, default is True.
+
+    Return
+    ---------
+        user's answer: boolean
+    """
+
+    answer = "invalid_answer"
+    valid_answer = {"yes": True, "y": True, "n": False, "no": False, "": default}
+    default_flag_msg = " [Y/n]" if default else " [y/N]"
+
+    while answer not in valid_answer:
+        answer = input(message + default_flag_msg).lower()
+    return valid_answer[answer]
+
+
+class AlphaMainnetContracts:
+    def __init__(self):
+        self.dev_safe = ApeSafe(SAFE_ETH_DEV_ADDR)
+        self.exec_safe = ApeSafe(SAFE_ETH_EXEC_ADDR)
+
+    def add(self, name, address):
+        setattr(self, name, address)
+
+
+def get_alpha_contracts():
+    return AlphaMainnetContracts()
